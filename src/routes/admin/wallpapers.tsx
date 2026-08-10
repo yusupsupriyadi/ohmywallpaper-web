@@ -7,7 +7,9 @@ import {
   Cancel01Icon,
   CloudUploadIcon,
   Delete02Icon,
+  GridViewIcon,
   Image01Icon,
+  ListViewIcon,
   PencilEdit02Icon,
   PlayIcon,
   Search01Icon,
@@ -48,6 +50,8 @@ export const Route = createFileRoute("/admin/wallpapers")({
   component: Wallpapers,
 });
 
+type ViewMode = "list" | "grid";
+
 function Wallpapers() {
   const data = Route.useLoaderData();
   const search = Route.useSearch();
@@ -58,8 +62,19 @@ function Wallpapers() {
   const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [q, setQ] = useState(search.q ?? "");
+  const [view, setView] = useState<ViewMode>("list");
 
   useEffect(() => setQ(search.q ?? ""), [search.q]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("omw-admin-view");
+    if (saved === "grid" || saved === "list") setView(saved);
+  }, []);
+
+  function switchView(v: ViewMode) {
+    setView(v);
+    localStorage.setItem("omw-admin-view", v);
+  }
 
   const pages = Math.max(1, Math.ceil(data.total / data.limit));
 
@@ -101,6 +116,29 @@ function Wallpapers() {
               className="w-56 bg-transparent py-2.5 text-sm outline-none placeholder:text-faint"
             />
           </form>
+          <div
+            id="view-toggle"
+            className="flex items-center gap-0.5 rounded-xl border border-line bg-panel p-1"
+          >
+            <button
+              title="List view"
+              onClick={() => switchView("list")}
+              className={`rounded-lg p-2 transition-colors ${
+                view === "list" ? "bg-accent-soft text-accent" : "text-faint hover:text-fg"
+              }`}
+            >
+              <HugeiconsIcon icon={ListViewIcon} size={16} />
+            </button>
+            <button
+              title="Grid view"
+              onClick={() => switchView("grid")}
+              className={`rounded-lg p-2 transition-colors ${
+                view === "grid" ? "bg-accent-soft text-accent" : "text-faint hover:text-fg"
+              }`}
+            >
+              <HugeiconsIcon icon={GridViewIcon} size={16} />
+            </button>
+          </div>
           <button
             id="btn-open-upload"
             onClick={() => setUploading(true)}
@@ -144,6 +182,7 @@ function Wallpapers() {
         ))}
       </div>
 
+      {view === "list" ? (
       <div className="mt-5 overflow-x-auto rounded-2xl border border-line bg-panel">
         <table className="w-full min-w-[820px] border-collapse text-sm">
           <thead>
@@ -229,6 +268,66 @@ function Wallpapers() {
           </tbody>
         </table>
       </div>
+      ) : (
+      <div id="wallpaper-card-grid" className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        {data.items.map((item) => (
+          <div
+            key={item.id}
+            className="group overflow-hidden rounded-2xl border border-line bg-panel transition-colors hover:border-line-strong"
+          >
+            <div className="relative aspect-[16/10]">
+              <img src={item.urlThumb} alt="" loading="lazy" className="h-full w-full object-cover" />
+              {item.kind === "live" && (
+                <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">
+                  <HugeiconsIcon icon={PlayIcon} size={10} />
+                  Live{item.durationSeconds ? ` · ${formatDuration(item.durationSeconds)}` : ""}
+                </span>
+              )}
+              <button
+                onClick={() => toggleFeatured(item)}
+                disabled={busyId === item.id}
+                title={item.featured ? "Unfeature" : "Feature on Home"}
+                className={`absolute right-2 top-2 rounded-lg bg-black/50 p-1.5 backdrop-blur transition-all disabled:opacity-40 ${
+                  item.featured
+                    ? "text-amber-400"
+                    : "text-white/70 opacity-0 hover:text-white group-hover:opacity-100"
+                }`}
+              >
+                <HugeiconsIcon icon={StarIcon} size={15} fill={item.featured ? "currentColor" : "none"} />
+              </button>
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={() => setEditing(item)}
+                  title="Edit"
+                  className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-white"
+                >
+                  <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
+                </button>
+                <button
+                  onClick={() => setDeleting(item)}
+                  title="Delete"
+                  className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-danger"
+                >
+                  <HugeiconsIcon icon={Delete02Icon} size={14} />
+                </button>
+              </div>
+            </div>
+            <div className="px-3.5 py-3">
+              <p className="truncate text-sm font-medium">{item.name}</p>
+              <p className="mt-0.5 truncate text-xs text-muted">
+                {item.category} · {formatResolution(item.width, item.height)} ·{" "}
+                {item.popularity.toLocaleString("en-US")} downloads
+              </p>
+            </div>
+          </div>
+        ))}
+        {data.items.length === 0 && (
+          <p className="col-span-full py-12 text-center text-muted">
+            Nothing matches these filters.
+          </p>
+        )}
+      </div>
+      )}
 
       {pages > 1 && (
         <div className="mt-5 flex items-center justify-center gap-3">
