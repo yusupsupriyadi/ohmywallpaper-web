@@ -1,18 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   Cancel01Icon,
+  CloudUploadIcon,
   Delete02Icon,
+  Image01Icon,
   PencilEdit02Icon,
   PlayIcon,
   Search01Icon,
   StarIcon,
 } from "@hugeicons/core-free-icons";
-import { deleteWallpaper, listWallpapers, updateWallpaper } from "../../server/admin";
+import {
+  createWallpaper,
+  deleteWallpaper,
+  listWallpapers,
+  updateWallpaper,
+} from "../../server/admin";
 import { CATEGORIES, type WallpaperItem } from "../../lib/types";
+import { probeFile, type Probe } from "../../lib/probe";
 import { formatBytes, formatDuration, formatResolution } from "../../lib/format";
 
 interface Filters {
@@ -47,6 +55,7 @@ function Wallpapers() {
   const router = useRouter();
   const [editing, setEditing] = useState<WallpaperItem | null>(null);
   const [deleting, setDeleting] = useState<WallpaperItem | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [q, setQ] = useState(search.q ?? "");
 
@@ -75,22 +84,32 @@ function Wallpapers() {
           <h1 className="text-2xl font-semibold tracking-tight">Wallpapers</h1>
           <p className="mt-1 text-sm text-muted">{data.total} items match.</p>
         </div>
-        <form
-          className="flex items-center gap-2 rounded-xl border border-line bg-panel px-3.5 focus-within:border-accent"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setFilter({ q: q.trim() || undefined });
-          }}
-        >
-          <HugeiconsIcon icon={Search01Icon} size={16} className="shrink-0 text-faint" />
-          <input
-            id="input-search-wallpapers"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name or source…"
-            className="w-56 bg-transparent py-2.5 text-sm outline-none placeholder:text-faint"
-          />
-        </form>
+        <div className="flex items-center gap-2.5">
+          <form
+            className="flex items-center gap-2 rounded-xl border border-line bg-panel px-3.5 focus-within:border-accent"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setFilter({ q: q.trim() || undefined });
+            }}
+          >
+            <HugeiconsIcon icon={Search01Icon} size={16} className="shrink-0 text-faint" />
+            <input
+              id="input-search-wallpapers"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search name or source…"
+              className="w-56 bg-transparent py-2.5 text-sm outline-none placeholder:text-faint"
+            />
+          </form>
+          <button
+            id="btn-open-upload"
+            onClick={() => setUploading(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02]"
+          >
+            <HugeiconsIcon icon={CloudUploadIcon} size={16} />
+            Upload
+          </button>
+        </div>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -235,6 +254,15 @@ function Wallpapers() {
         </div>
       )}
 
+      {uploading && (
+        <UploadDialog
+          onClose={() => setUploading(false)}
+          onPublished={async () => {
+            setUploading(false);
+            await router.invalidate();
+          }}
+        />
+      )}
       {editing && (
         <EditDialog
           item={editing}
@@ -274,19 +302,216 @@ function FilterChip({ active, label, onClick }: { active: boolean; label: string
   );
 }
 
-function Dialog({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Dialog({
+  children,
+  onClose,
+  wide = false,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  wide?: boolean;
+}) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-5 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-line bg-panel-2 p-6 shadow-2xl"
+        className={`max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-line bg-panel-2 p-6 shadow-2xl ${
+          wide ? "max-w-2xl" : "max-w-md"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
     </div>
+  );
+}
+
+function UploadDialog({
+  onClose,
+  onPublished,
+}: {
+  onClose: () => void;
+  onPublished: () => Promise<void>;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [probe, setProbe] = useState<Probe | null>(null);
+  const [thumbUrl, setThumbUrl] = useState<string | null>(null);
+  const [probing, setProbing] = useState(false);
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [featured, setFeatured] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+    };
+  }, [thumbUrl]);
+
+  async function choose(f: File) {
+    setError(null);
+    setProbe(null);
+    setFile(f);
+    setProbing(true);
+    if (thumbUrl) {
+      URL.revokeObjectURL(thumbUrl);
+      setThumbUrl(null);
+    }
+    setName(f.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim());
+    try {
+      const p = await probeFile(f);
+      setProbe(p);
+      setThumbUrl(URL.createObjectURL(p.thumb));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not read this file");
+      setFile(null);
+    } finally {
+      setProbing(false);
+    }
+  }
+
+  async function submit() {
+    if (!file || !probe) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      form.set("thumb", new File([probe.thumb], "thumb.jpg", { type: "image/jpeg" }));
+      form.set("name", name.trim() || "Untitled");
+      form.set("category", category);
+      form.set("kind", probe.kind);
+      form.set("width", String(probe.width));
+      form.set("height", String(probe.height));
+      if (probe.duration) form.set("durationSeconds", String(Math.round(probe.duration)));
+      form.set("featured", String(featured));
+      await createWallpaper({ data: form });
+      await onPublished();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog onClose={onClose} wide>
+      <div className="flex items-start justify-between">
+        <h2 className="text-lg font-semibold">Upload wallpaper</h2>
+        <button onClick={onClose} className="rounded-lg p-1 text-faint hover:text-fg">
+          <HugeiconsIcon icon={Cancel01Icon} size={16} />
+        </button>
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        JPEG, PNG, or WebP for static — MP4 or WebM for live.
+      </p>
+
+      <div
+        id="upload-dropzone"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          const f = e.dataTransfer.files[0];
+          if (f) void choose(f);
+        }}
+        className={`mt-5 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition-colors ${
+          dragOver ? "border-accent bg-accent-soft" : "border-line bg-ink/40 hover:border-line-strong"
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void choose(f);
+            e.target.value = "";
+          }}
+        />
+        <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+          <HugeiconsIcon icon={CloudUploadIcon} size={22} />
+        </span>
+        <p className="mt-3 text-sm font-medium">
+          {probing ? "Reading file…" : file ? file.name : "Drop a file here or click to browse"}
+        </p>
+        <p className="mt-1 text-xs text-faint">Recommended: 2560×1440 or larger</p>
+      </div>
+
+      {error && <p className="mt-3 text-sm text-danger">{error}</p>}
+
+      {file && probe && thumbUrl && (
+        <div className="mt-5 grid gap-5 sm:grid-cols-[200px_1fr]">
+          <div>
+            <div className="relative overflow-hidden rounded-xl border border-line">
+              <img src={thumbUrl} alt="Generated thumbnail" className="aspect-[16/10] w-full object-cover" />
+              <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">
+                <HugeiconsIcon icon={probe.kind === "live" ? PlayIcon : Image01Icon} size={10} />
+                {probe.kind === "live" ? "Live" : "Static"}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-muted">
+              {probe.width}×{probe.height} · {formatBytes(file.size)}
+              {probe.duration ? ` · ${formatDuration(probe.duration)}` : ""}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-muted">
+              Display name
+            </label>
+            <input
+              id="input-upload-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-line bg-ink px-3.5 py-2.5 text-sm outline-none focus:border-accent"
+            />
+            <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-muted">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-line bg-ink px-3.5 py-2.5 text-sm outline-none focus:border-accent"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <label className="mt-4 flex cursor-pointer items-center gap-2.5 text-sm">
+              <input
+                type="checkbox"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="h-4 w-4 accent-[#4c8dff]"
+              />
+              Feature on the app's Home screen
+            </label>
+            <button
+              id="btn-publish-wallpaper"
+              onClick={submit}
+              disabled={busy || name.trim() === ""}
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-50"
+            >
+              <HugeiconsIcon icon={CloudUploadIcon} size={16} />
+              {busy ? "Publishing…" : "Publish to catalog"}
+            </button>
+          </div>
+        </div>
+      )}
+    </Dialog>
   );
 }
 

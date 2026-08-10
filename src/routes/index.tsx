@@ -1,10 +1,9 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   BatteryEcoChargingIcon,
   CpuChargeIcon,
   Download01Icon,
-  GithubIcon,
   GridViewIcon,
   Image01Icon,
   MonitorDotIcon,
@@ -80,27 +79,13 @@ function Landing() {
             <a href="#gallery-section" className="transition-colors hover:text-fg">
               Gallery
             </a>
-            <a href="#download-section" className="transition-colors hover:text-fg">
-              Download
-            </a>
           </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="https://github.com/yusupsupriyadi/ohmywallpaper"
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-muted transition-colors hover:border-line-strong hover:text-fg"
-              aria-label="GitHub"
-            >
-              <HugeiconsIcon icon={GithubIcon} size={18} />
-            </a>
-            <Link
-              to="/admin"
-              className="rounded-lg border border-line px-3.5 py-2 text-sm text-muted transition-colors hover:border-line-strong hover:text-fg"
-            >
-              Admin
-            </Link>
-          </div>
+          <a
+            href="#download-section"
+            className="rounded-lg border border-line px-3.5 py-2 text-sm text-muted transition-colors hover:border-line-strong hover:text-fg"
+          >
+            Download
+          </a>
         </div>
       </nav>
 
@@ -255,31 +240,19 @@ function Landing() {
               Get OhMyWallpaper
             </h2>
             <p className="relative mx-auto mt-3 max-w-md text-muted">
-              Free and open source. Requires Windows 10 (1809+) or Windows 11 with WebView2.
+              Requires Windows 10 (1809+) or Windows 11 with WebView2.
             </p>
             <div className="relative mt-8 flex flex-wrap items-center justify-center gap-3">
-              <a
+              <span
                 id="btn-download-installer"
-                href="https://github.com/yusupsupriyadi/ohmywallpaper/releases"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white shadow-[0_4px_24px_rgba(76,141,255,0.4)] transition-transform hover:scale-[1.02]"
+                className="inline-flex cursor-default items-center gap-2 rounded-xl bg-accent/40 px-5 py-3 text-sm font-semibold text-white/70"
               >
                 <HugeiconsIcon icon={Download01Icon} size={18} />
-                Installer (.exe / .msi)
-              </a>
-              <a
-                href="https://github.com/yusupsupriyadi/ohmywallpaper"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-ink px-5 py-3 text-sm font-medium text-fg transition-colors hover:border-line-strong"
-              >
-                <HugeiconsIcon icon={GithubIcon} size={18} className="text-muted" />
-                View source
-              </a>
+                Installer (.exe / .msi) — coming soon
+              </span>
             </div>
             <p className="relative mt-5 text-xs text-faint">
-              Builds are produced with Tauri — a few MB, not a few hundred.
+              A tiny native installer — a few MB, not a few hundred.
             </p>
           </div>
         </div>

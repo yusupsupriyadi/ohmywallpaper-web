@@ -6,11 +6,10 @@ Stack: [TanStack Start](https://tanstack.com/start) (React 19, SSR, server funct
 
 ## Pages
 
-- `/` — landing page (hero, features, live gallery pulled from the catalog API, download links)
-- `/login` — superadmin sign-in (email + password)
+- `/` — landing page (hero, features, live gallery pulled from the catalog API, download section)
+- `/login` — superadmin sign-in (email + password); not linked from the landing page
 - `/admin` — dashboard (stats, category breakdown, recent uploads)
-- `/admin/wallpapers` — catalog table: search, filters, inline featured toggle, edit, delete
-- `/admin/upload` — publish a new wallpaper: image or video; dimensions, duration, and a 640px thumbnail are extracted in the browser before upload
+- `/admin/wallpapers` — catalog table: search, filters, inline featured toggle, edit, delete, and an Upload dialog (image or video; dimensions, duration, and a 640px thumbnail are extracted in the browser before upload)
 
 ## How it talks to the backend
 
