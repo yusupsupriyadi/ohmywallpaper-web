@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #101113;
-  --color-panel: #16181d;
-  --color-panel-2: #1b1e24;
+  --color-ink: #0a0b0d;
+  --color-panel: #121317;
+  --color-panel-2: #17191e;
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-strong: rgba(255, 255, 255, 0.14);
   --color-fg: #f2f3f5;
   --color-muted: #9aa0aa;
-  --color-faint: #6b7078;
+  --color-faint: #63676e;
   --color-accent: #4c8dff;
   --color-accent-soft: rgba(76, 141, 255, 0.14);
   --color-danger: #ff5c5c;

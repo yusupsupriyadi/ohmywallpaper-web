@@ -41,3 +41,11 @@ export interface Showcase {
   featured: WallpaperItem[];
   picks: WallpaperItem[];
 }
+
+export interface PublicStats {
+  total: number;
+  live: number;
+  uhd: number;
+  categories: number;
+  downloads: number;
+}
