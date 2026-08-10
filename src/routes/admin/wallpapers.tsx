@@ -7,6 +7,7 @@ import {
   Cancel01Icon,
   CloudUploadIcon,
   Delete02Icon,
+  EyeIcon,
   GridViewIcon,
   Image01Icon,
   ListViewIcon,
@@ -59,6 +60,7 @@ function Wallpapers() {
   const router = useRouter();
   const [editing, setEditing] = useState<WallpaperItem | null>(null);
   const [deleting, setDeleting] = useState<WallpaperItem | null>(null);
+  const [previewing, setPreviewing] = useState<WallpaperItem | null>(null);
   const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [q, setQ] = useState(search.q ?? "");
@@ -200,14 +202,18 @@ function Wallpapers() {
               <tr key={item.id} className="border-b border-line/60 last:border-0 hover:bg-white/[0.02]">
                 <td className="px-5 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-11 w-[70px] shrink-0 overflow-hidden rounded-lg border border-line">
+                    <button
+                      onClick={() => setPreviewing(item)}
+                      title="Preview"
+                      className="relative h-11 w-[70px] shrink-0 cursor-zoom-in overflow-hidden rounded-lg border border-line"
+                    >
                       <img src={item.urlThumb} alt="" loading="lazy" className="h-full w-full object-cover" />
                       {item.kind === "live" && (
                         <span className="absolute bottom-1 left-1 rounded bg-black/70 p-0.5 text-white">
                           <HugeiconsIcon icon={PlayIcon} size={9} />
                         </span>
                       )}
-                    </div>
+                    </button>
                     <div className="min-w-0">
                       <p className="max-w-[220px] truncate font-medium">{item.name}</p>
                       <p className="max-w-[220px] truncate text-xs text-faint">{item.source}</p>
@@ -240,6 +246,13 @@ function Wallpapers() {
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      onClick={() => setPreviewing(item)}
+                      title="Preview"
+                      className="rounded-lg border border-line p-2 text-muted transition-colors hover:border-line-strong hover:text-fg"
+                    >
+                      <HugeiconsIcon icon={EyeIcon} size={15} />
+                    </button>
                     <button
                       onClick={() => setEditing(item)}
                       title="Edit"
@@ -276,7 +289,14 @@ function Wallpapers() {
             className="group overflow-hidden rounded-2xl border border-line bg-panel transition-colors hover:border-line-strong"
           >
             <div className="relative aspect-[16/10]">
-              <img src={item.urlThumb} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <img
+                src={item.urlThumb}
+                alt=""
+                loading="lazy"
+                onClick={() => setPreviewing(item)}
+                title="Preview"
+                className="h-full w-full cursor-zoom-in object-cover"
+              />
               {item.kind === "live" && (
                 <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">
                   <HugeiconsIcon icon={PlayIcon} size={10} />
@@ -295,18 +315,18 @@ function Wallpapers() {
               >
                 <HugeiconsIcon icon={StarIcon} size={15} fill={item.featured ? "currentColor" : "none"} />
               </button>
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
                 <button
                   onClick={() => setEditing(item)}
                   title="Edit"
-                  className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-white"
+                  className="pointer-events-auto rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-white"
                 >
                   <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
                 </button>
                 <button
                   onClick={() => setDeleting(item)}
                   title="Delete"
-                  className="rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-danger"
+                  className="pointer-events-auto rounded-lg bg-black/50 p-2 text-white/80 backdrop-blur transition-colors hover:text-danger"
                 >
                   <HugeiconsIcon icon={Delete02Icon} size={14} />
                 </button>
@@ -353,6 +373,9 @@ function Wallpapers() {
         </div>
       )}
 
+      {previewing && (
+        <PreviewDialog item={previewing} onClose={() => setPreviewing(null)} />
+      )}
       {uploading && (
         <UploadDialog
           onClose={() => setUploading(false)}
@@ -422,6 +445,68 @@ function Dialog({
         onClick={(e) => e.stopPropagation()}
       >
         {children}
+      </div>
+    </div>
+  );
+}
+
+function PreviewDialog({ item, onClose }: { item: WallpaperItem; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      id="preview-modal"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-5 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-4xl overflow-hidden rounded-2xl border border-line bg-panel-2 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative bg-black">
+          {item.kind === "live" ? (
+            <video
+              src={item.urlFull}
+              poster={item.urlThumb}
+              autoPlay
+              loop
+              muted
+              controls
+              playsInline
+              className="max-h-[70vh] w-full object-contain"
+            />
+          ) : (
+            <img
+              src={item.urlFull}
+              alt={item.name}
+              className="max-h-[70vh] w-full object-contain"
+            />
+          )}
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
+            <p className="truncate text-[15px] font-semibold">{item.name}</p>
+            <p className="mt-0.5 text-xs text-muted">
+              {item.category} · {item.kind === "live" ? "Live" : "Static"} ·{" "}
+              {formatResolution(item.width, item.height)} · {formatBytes(item.sizeBytes)}
+              {item.kind === "live" && item.durationSeconds
+                ? ` · ${formatDuration(item.durationSeconds)}`
+                : ""}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-xl border border-line px-4 py-2 text-sm text-muted transition-colors hover:border-line-strong hover:text-fg"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
