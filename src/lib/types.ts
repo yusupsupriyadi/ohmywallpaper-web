@@ -1,5 +1,10 @@
-export const CATEGORIES = ["Nature", "Space", "City", "Abstract", "Anime", "Minimal"] as const;
-export type Category = (typeof CATEGORIES)[number];
+/** A row of the API's `categories` table — the catalog's category list is data, not a constant. */
+export interface Category {
+  id: string;
+  name: string;
+  sortOrder: number;
+  count: number;
+}
 
 export type WallpaperKind = "static" | "live";
 

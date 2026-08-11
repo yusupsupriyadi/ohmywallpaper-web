@@ -22,7 +22,8 @@ import {
   listWallpapers,
   updateWallpaper,
 } from "../../server/admin";
-import { CATEGORIES, type WallpaperItem } from "../../lib/types";
+import { listCategories } from "../../server/public";
+import type { Category, WallpaperItem } from "../../lib/types";
 import { probeFile, type Probe } from "../../lib/probe";
 import { formatBytes, formatDuration, formatResolution } from "../../lib/format";
 
@@ -44,10 +45,15 @@ export const Route = createFileRoute("/admin/wallpapers")({
     page: typeof search.page === "number" && search.page > 1 ? search.page : undefined,
   }),
   loaderDeps: ({ search }) => search,
-  loader: ({ deps }) =>
-    listWallpapers({
-      data: { search: deps.q, category: deps.category, kind: deps.kind, page: deps.page },
-    }),
+  loader: async ({ deps }) => {
+    const [list, categories] = await Promise.all([
+      listWallpapers({
+        data: { search: deps.q, category: deps.category, kind: deps.kind, page: deps.page },
+      }),
+      listCategories(),
+    ]);
+    return { ...list, categories };
+  },
   component: Wallpapers,
 });
 
@@ -174,12 +180,12 @@ function Wallpapers() {
           label="All categories"
           onClick={() => setFilter({ category: undefined })}
         />
-        {CATEGORIES.map((c) => (
+        {data.categories.map((c) => (
           <FilterChip
-            key={c}
-            active={search.category === c}
-            label={c}
-            onClick={() => setFilter({ category: c })}
+            key={c.id}
+            active={search.category === c.name}
+            label={c.name}
+            onClick={() => setFilter({ category: c.name })}
           />
         ))}
       </div>
@@ -378,6 +384,7 @@ function Wallpapers() {
       )}
       {uploading && (
         <UploadDialog
+          categories={data.categories}
           onClose={() => setUploading(false)}
           onPublished={async () => {
             setUploading(false);
@@ -388,6 +395,7 @@ function Wallpapers() {
       {editing && (
         <EditDialog
           item={editing}
+          categories={data.categories}
           onClose={() => setEditing(null)}
           onSaved={async () => {
             setEditing(null);
@@ -513,9 +521,11 @@ function PreviewDialog({ item, onClose }: { item: WallpaperItem; onClose: () => 
 }
 
 function UploadDialog({
+  categories,
   onClose,
   onPublished,
 }: {
+  categories: Category[];
   onClose: () => void;
   onPublished: () => Promise<void>;
 }) {
@@ -525,7 +535,7 @@ function UploadDialog({
   const [thumbUrl, setThumbUrl] = useState<string | null>(null);
   const [probing, setProbing] = useState(false);
   const [name, setName] = useState("");
-  const [category, setCategory] = useState<string>(CATEGORIES[0]);
+  const [category, setCategory] = useState<string>(categories[0]?.name ?? "");
   const [featured, setFeatured] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -668,9 +678,9 @@ function UploadDialog({
               onChange={(e) => setCategory(e.target.value)}
               className="mt-1.5 w-full rounded-xl border border-line bg-ink px-3.5 py-2.5 text-sm outline-none focus:border-accent"
             >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+              {categories.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -701,10 +711,12 @@ function UploadDialog({
 
 function EditDialog({
   item,
+  categories,
   onClose,
   onSaved,
 }: {
   item: WallpaperItem;
+  categories: Category[];
   onClose: () => void;
   onSaved: () => Promise<void>;
 }) {
@@ -757,9 +769,9 @@ function EditDialog({
         onChange={(e) => setCategory(e.target.value)}
         className="mt-1.5 w-full rounded-xl border border-line bg-ink px-3.5 py-2.5 text-sm outline-none focus:border-accent"
       >
-        {CATEGORIES.map((c) => (
-          <option key={c} value={c}>
-            {c}
+        {categories.map((c) => (
+          <option key={c.id} value={c.name}>
+            {c.name}
           </option>
         ))}
       </select>
