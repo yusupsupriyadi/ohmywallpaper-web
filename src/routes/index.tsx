@@ -249,9 +249,13 @@ const FAQS: [string, string][] = [
 /** Unique wallpapers per gallery marquee row; the loader fetches 2× this many. */
 const GALLERY_ROW_TILES = 12;
 
-/** Marquee durations, matching the design's 55s base and its 1.25×/1.5× steps. */
-const SPEED_A = "55s";
-const SPEED_B = "69s";
+/**
+ * Marquee durations. The design's 55s base was tuned for 320px tiles; the gallery
+ * now runs 440px ones, so its two speeds are scaled by the same factor to hold the
+ * original ~73 px/s. The reviews row keeps 83s — its cards did not change size.
+ */
+const SPEED_A = "75s";
+const SPEED_B = "94s";
 const SPEED_C = "83s";
 
 /* -------------------------------- fragments ------------------------------- */
@@ -353,7 +357,7 @@ function MarqueeRow({
         {[...items, ...items].map((item, i) => (
           <div
             key={`${item.id}-${i}`}
-            className="h-[150px] w-[320px] flex-none overflow-hidden rounded-[14px] border border-white/[0.16] bg-[#101014] shadow-[0_10px_26px_rgba(0,0,0,0.42)]"
+            className="h-[206px] w-[440px] flex-none overflow-hidden rounded-[16px] border border-white/[0.16] bg-[#101014] shadow-[0_10px_26px_rgba(0,0,0,0.42)]"
           >
             <img
               src={item.urlThumb}
