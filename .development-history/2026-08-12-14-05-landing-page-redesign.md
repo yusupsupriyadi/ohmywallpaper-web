@@ -22,8 +22,11 @@ accordion FAQ.
 ## Decisions
 
 - Gallery marquees render the catalog's **featured** wallpapers (live API data) instead of
-  the design's static `w0x`/`c0x` tiles; each row is padded to 7 tiles and row B is offset
-  half a lap so the duplicated track stays wider than the viewport and the rows never align.
+  the design's static `w0x`/`c0x` tiles. The list is split down the middle — first half in
+  the top row, second half in the bottom row — so the two rows never show the same piece.
+  Each row is then padded in whole laps to at least 7 tiles, keeping its duplicated track
+  wider than the viewport without ever placing a wallpaper next to a copy of itself.
+  Under four featured a half would be a single repeating tile, so both rows take the lot.
 - Screenshots ship as WebP (86q) — 229/67/361 KB instead of 2.0/0.9/6.2 MB PNG.
 - The design's animation keyframes live in `styles.css` as classes rather than inline
   styles, so `prefers-reduced-motion` can switch them all off in one place.
