@@ -13,6 +13,9 @@
   --color-accent-soft: rgba(76, 141, 255, 0.14);
   --color-danger: #ff5c5c;
   --font-sans: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* Landing-page pairing: Gabarito for display, Figtree for body copy. */
+  --font-display: "Gabarito", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --animate-fade-up: fade-up 0.5s ease both;
 
   @keyframes fade-up {
@@ -47,6 +50,66 @@ body {
 
 ::selection {
   background: rgba(76, 141, 255, 0.35);
+}
+
+/* Landing-page motion: the two gallery marquees, the hero reveal and the glow. */
+@keyframes mqA {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes mqB {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Duration comes from --mq-duration so each row can run at its own speed. */
+.marquee-a {
+  animation: mqA var(--mq-duration, 55s) linear infinite;
+}
+.marquee-b {
+  animation: mqB var(--mq-duration, 55s) linear infinite;
+}
+.hero-rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.hero-glow {
+  animation: breathe 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-a,
+  .marquee-b,
+  .hero-rise,
+  .hero-glow {
+    animation: none;
+  }
 }
 
 ::-webkit-scrollbar {

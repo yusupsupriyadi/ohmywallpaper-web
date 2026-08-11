@@ -1,22 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { HugeiconsIcon } from "@hugeicons/react";
-import type { IconSvgElement } from "@hugeicons/react";
-import {
-  ArrowDown01Icon,
-  BatteryEcoChargingIcon,
-  BatteryFullIcon,
-  CpuIcon,
-  Download01Icon,
-  FlashIcon,
-  GridViewIcon,
-  Image01Icon,
-  LockIcon,
-  MonitorDotIcon,
-  PlayIcon,
-  Video01Icon,
-} from "@hugeicons/core-free-icons";
-import { Logo } from "../components/Logo";
 import { getShowcase } from "../server/public";
 import type { WallpaperItem } from "../lib/types";
 
@@ -25,181 +8,298 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+/* --------------------------------- tokens --------------------------------- */
+
+/** Frosted panel used by the feature/review cards. */
+const GLASS_CARD: React.CSSProperties = {
+  border: "1px solid rgba(255,255,255,0.12)",
+  background:
+    "linear-gradient(180deg,rgba(255,255,255,0.085),rgba(255,255,255,0.028))",
+  backdropFilter: "blur(24px) saturate(170%)",
+  WebkitBackdropFilter: "blur(24px) saturate(170%)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.22),0 16px 40px rgba(0,0,0,0.35)",
+};
+
+/** Frosted pill used by the eyebrow badge and the hero perf chips. */
+const GLASS_PILL: React.CSSProperties = {
+  border: "1px solid rgba(255,255,255,0.14)",
+  background:
+    "linear-gradient(180deg,rgba(255,255,255,0.13),rgba(255,255,255,0.05))",
+  backdropFilter: "blur(18px) saturate(180%)",
+  WebkitBackdropFilter: "blur(18px) saturate(180%)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.26),0 6px 16px rgba(0,0,0,0.25)",
+};
+
+/** Frosted secondary button. */
+const GLASS_BUTTON: React.CSSProperties = {
+  border: "1px solid rgba(255,255,255,0.16)",
+  background:
+    "linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.055))",
+  backdropFilter: "blur(20px) saturate(180%)",
+  WebkitBackdropFilter: "blur(20px) saturate(180%)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3),0 10px 26px rgba(0,0,0,0.3)",
+};
+
+const MARQUEE_MASK: React.CSSProperties = {
+  WebkitMaskImage:
+    "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)",
+  maskImage: "linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)",
+};
+
+const H2 = "font-display text-[clamp(36px,5vw,62px)] font-semibold leading-[1.02] tracking-[-0.032em]";
+const EYEBROW = "mb-[18px] text-xs font-bold uppercase tracking-[0.16em] text-[#4aa8ff]";
+const LEAD = "text-[15.5px] leading-[1.58] text-[#8f8f99] text-pretty";
+const CTA_LIGHT =
+  "inline-flex items-center gap-2.5 rounded-full bg-[#f4f4f6] text-[#0a0a0c] text-[15px] font-semibold shadow-[0_8px_30px_rgba(255,255,255,0.10)] transition-transform hover:scale-[1.02]";
+
 /* ---------------------------------- data ---------------------------------- */
 
-const FEATURES: { icon: IconSvgElement; tint: string; title: string; body: string }[] = [
+const PERF_CHIPS = [
+  "Low CPU",
+  "Low GPU",
+  "Battery friendly",
+  "Just 5 MB RAM",
+  "1 FPS when Windows is locked or an app is open",
+];
+
+const FEATURES: {
+  title: string;
+  body: string;
+  gradient: string;
+  glyph: React.ReactNode;
+}[] = [
   {
-    icon: FlashIcon,
-    tint: "#34d399",
-    title: "Lightweight",
-    body: "A native Rust engine, not a browser in disguise. Tiny installer, tiny memory footprint.",
+    title: "True 4K and QHD",
+    body: "Every wallpaper ships at 3840×2160 and 2560×1440, so nothing arrives stretched or resampled on your monitor.",
+    gradient: "linear-gradient(135deg,#3b82f6,#22d3ee)",
+    glyph: (
+      <span className="font-display text-[13px] font-bold text-[#04121f]">4K</span>
+    ),
   },
   {
-    icon: Video01Icon,
-    tint: "#a78bfa",
-    title: "Live wallpapers",
-    body: "MP4 and WebM play behind your desktop icons using the real WorkerW technique.",
+    title: "Live, without the cost",
+    body: "Looping video backgrounds that stop rendering the second a window covers them. Your GPU stays free for games.",
+    gradient: "linear-gradient(135deg,#a855f7,#ff5fa2)",
+    glyph: (
+      <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+        <polygon points="9.5,1 3,9.8 8,9.8 7,16 14,7.2 9,7.2" fill="#1a0716" />
+      </svg>
+    ),
   },
   {
-    icon: MonitorDotIcon,
-    tint: "#4c8dff",
-    title: "Multiple displays",
-    body: "A different wallpaper on every monitor, span mode, and DPI-correct placement.",
+    title: "Categories that make sense",
+    body: "Nature, Space, City, Abstract, Anime, Minimal, Dark. Browse by mood instead of digging through tag soup.",
+    gradient: "linear-gradient(135deg,#22c55e,#84cc16)",
+    glyph: (
+      <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+        <rect x="1" y="1" width="6.6" height="6.6" rx="1.6" fill="#06210f" />
+        <rect x="9.4" y="1" width="6.6" height="6.6" rx="1.6" fill="#06210f" />
+        <rect x="1" y="9.4" width="6.6" height="6.6" rx="1.6" fill="#06210f" />
+        <rect x="9.4" y="9.4" width="6.6" height="6.6" rx="1.6" fill="#06210f" />
+      </svg>
+    ),
   },
   {
-    icon: BatteryEcoChargingIcon,
-    tint: "#2dd4bf",
-    title: "Battery aware",
-    body: "Playback pauses on battery, power saver, fullscreen apps, and the lock screen.",
+    title: "One click to set",
+    body: "Preview full screen, press Set Wallpaper. No saving files, no right-click menus, no Settings detour.",
+    gradient: "linear-gradient(135deg,#f97316,#facc15)",
+    glyph: (
+      <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+        <rect x="0.8" y="2.4" width="15.4" height="10.2" rx="1.8" fill="#241002" />
+        <rect x="5.6" y="14" width="5.8" height="1.7" rx="0.85" fill="#241002" />
+      </svg>
+    ),
   },
   {
-    icon: CpuIcon,
-    tint: "#fb923c",
-    title: "Native Win32",
-    body: "IDesktopWallpaper, DWM, and WIC — the same APIs Windows itself uses.",
+    title: "Your library, offline",
+    body: "Favourite anything and it stays on your PC. Once downloaded, wallpapers work with no connection at all.",
+    gradient: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+    glyph: (
+      <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="7.2" fill="none" stroke="#0d0824" strokeWidth="2.4" />
+        <circle cx="8.5" cy="8.5" r="2.4" fill="#0d0824" />
+      </svg>
+    ),
   },
   {
-    icon: LockIcon,
-    tint: "#f472b6",
-    title: "No login, no ads",
-    body: "No account, no telemetry, no nags. Your desktop, your files, your business.",
+    title: "No ads, no account",
+    body: "Nothing to sign up for, nothing tracked, nothing sold. Install it and it simply runs.",
+    gradient: "linear-gradient(135deg,#e11d48,#fb7185)",
+    glyph: (
+      <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true">
+        <rect x="2.6" y="7.2" width="11.8" height="8.4" rx="2" fill="#2a0410" />
+        <path
+          d="M5.4 7.2V5.1a3.1 3.1 0 0 1 6.2 0v2.1"
+          fill="none"
+          stroke="#2a0410"
+          strokeWidth="2.1"
+        />
+      </svg>
+    ),
   },
 ];
 
-const FAQS: { q: string; a: string }[] = [
+const PLAN_INCLUDES = [
+  "Full 4K and QHD library",
+  "Every live wallpaper",
+  "All seven categories",
+  "Favourites and offline library",
+  "Multi-monitor support",
+  "New wallpapers every week",
+];
+
+const QUOTES: { text: string; name: string; role: string }[] = [
   {
-    q: "Is OhMyWallpaper really free?",
-    a: "Yes. The app and the built-in Explore catalog are free to use. No account, no trial timers, no ads.",
+    text: '"Finally a wallpaper app for Windows that does not ship with a store, a launcher and three background services."',
+    name: "Rendra",
+    role: "PC builder",
   },
   {
-    q: "Will it slow down my PC or drain my battery?",
-    a: "No. Static wallpapers are handed to Windows itself, so there is zero runtime cost. Live wallpapers pause automatically on battery, in power-saver mode, when an app runs fullscreen, and on the lock screen.",
+    text: '"The live ones actually pause when I play. That was the whole reason I stopped using the last app I tried."',
+    name: "M. Faiz",
+    role: "Streamer",
   },
   {
-    q: "Which Windows versions are supported?",
-    a: "Windows 10 (1809 or newer) and Windows 11, with the WebView2 runtime — preinstalled on almost every modern machine.",
+    text: '"Set Wallpaper, one click, done. I switch backgrounds about four times a day now."',
+    name: "Aletta",
+    role: "Product designer",
   },
   {
-    q: "Can I use my own images and videos?",
-    a: "Yes. Import JPEG, PNG, WebP, BMP, or GIF images and MP4 or WebM videos of any length — drag and drop them straight into the app.",
+    text: '"Two monitors, two different wallpapers, no fighting with Windows settings."',
+    name: "Kevin O.",
+    role: "Data analyst",
   },
   {
-    q: "How do live wallpapers stay behind my desktop icons?",
-    a: "The engine parents its player into the desktop's own WorkerW layer — the native technique, not an always-on-top overlay — so icons, clicks, and desktop menus keep working normally.",
+    text: '"The Dark and Minimal categories are exactly my taste. Everything is genuinely 4K."',
+    name: "Sasha",
+    role: "Illustrator",
   },
   {
-    q: "Do I need to create an account?",
-    a: "Never. Everything, including the online catalog, works without signing in.",
+    text: '"No account, no ads, no nagging. It just sits there and looks good."',
+    name: "Bagas",
+    role: "Student",
   },
 ];
 
-/* --------------------------------- helpers -------------------------------- */
+const FAQS: [string, string][] = [
+  [
+    "Is OhMyWallpaper really free?",
+    "Yes, entirely. There is no paid tier, no subscription and no trial period. The full library, live wallpapers and every feature are included at no cost.",
+  ],
+  [
+    "Will live wallpapers slow down my PC or games?",
+    "Playback stops as soon as a window covers the desktop or a game goes fullscreen, and resumes when the desktop is visible again. On idle it sits at a couple of percent CPU.",
+  ],
+  [
+    "Which Windows versions are supported?",
+    "Windows 10 (build 19041 and later) and Windows 11, on both x64 and ARM64. There is no macOS or Linux build.",
+  ],
+  [
+    "Can I use my own images and videos?",
+    "Yes. Import local JPG, PNG and MP4 files and they behave exactly like library wallpapers, including per-monitor assignment and shuffle.",
+  ],
+  [
+    "Do I need an account?",
+    "No. There is no sign-up, no email, no telemetry. Downloads go straight to your machine.",
+  ],
+  [
+    "Where are the wallpapers stored?",
+    "In your user Pictures folder under OhMyWallpaper. You can move or delete them at any time and the app will keep working.",
+  ],
+];
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+/** Marquee durations, matching the design's 55s base and its 1.25×/1.5× steps. */
+const SPEED_A = "55s";
+const SPEED_B = "69s";
+const SPEED_C = "83s";
+
+/* -------------------------------- fragments ------------------------------- */
+
+function WindowsGlyph({ size = 13 }: { size?: number }) {
   return (
-    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
-      {children}
-    </p>
+    <svg width={size} height={size} viewBox="0 0 13 13" aria-hidden="true">
+      <rect x="0" y="0" width="5.6" height="5.6" fill="currentColor" />
+      <rect x="7.4" y="0" width="5.6" height="5.6" fill="currentColor" />
+      <rect x="0" y="7.4" width="5.6" height="5.6" fill="currentColor" />
+      <rect x="7.4" y="7.4" width="5.6" height="5.6" fill="currentColor" />
+    </svg>
   );
 }
 
-function Clock() {
-  const [now, setNow] = useState<Date | null>(null);
-  useEffect(() => {
-    setNow(new Date());
-    const t = setInterval(() => setNow(new Date()), 30_000);
-    return () => clearInterval(t);
-  }, []);
-  if (!now) return null;
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-8 text-center text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-      <p className="text-5xl font-semibold tracking-tight sm:text-6xl">
-        {now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })}
-      </p>
-      <p className="mt-1 text-sm font-medium text-white/85">
-        {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-      </p>
-    </div>
-  );
+/** `count` tiles taken from `items`, wrapping around and starting at `offset`. */
+function marqueeTiles(items: WallpaperItem[], offset: number, count = 7) {
+  if (items.length === 0) return [];
+  return Array.from({ length: count }, (_, i) => items[(i + offset) % items.length]);
 }
 
-/** A Windows desktop playing a live wallpaper, wallspace-style hero visual. */
-function DesktopMockup({ video, poster }: { video: string | null; poster: string | null }) {
+function MarqueeRow({
+  items,
+  direction,
+  duration,
+}: {
+  items: WallpaperItem[];
+  direction: "a" | "b";
+  duration: string;
+}) {
   return (
-    <div
-      id="hero-desktop-mockup"
-      className="relative mx-auto aspect-[16/9] w-full max-w-md overflow-hidden rounded-2xl border border-line-strong bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
-    >
-      {video ? (
-        <video
-          src={video}
-          poster={poster ?? undefined}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <div
-          className="h-full w-full"
-          style={{ background: "linear-gradient(135deg, #16233f, #0b1020 55%, #1b1030)" }}
-        />
-      )}
-      <Clock />
-      {/* Windows-style centered taskbar */}
-      <div className="absolute inset-x-0 bottom-2 flex justify-center">
-        <div className="flex items-center gap-2 rounded-lg bg-black/45 px-3 py-1.5 backdrop-blur-md">
-          <span className="h-3.5 w-3.5 rounded-[4px] bg-gradient-to-br from-accent to-[#7c5cff]" />
-          <span className="h-3.5 w-3.5 rounded-[4px] bg-white/30" />
-          <span className="h-3.5 w-3.5 rounded-[4px] bg-white/30" />
-          <span className="h-3.5 w-3.5 rounded-[4px] bg-white/30" />
-        </div>
+    <div className="overflow-hidden">
+      <div
+        className={`flex w-max gap-4 ${direction === "a" ? "marquee-a" : "marquee-b"}`}
+        style={{ "--mq-duration": duration } as React.CSSProperties}
+      >
+        {[...items, ...items].map((item, i) => (
+          <div
+            key={`${item.id}-${i}`}
+            className="h-[150px] w-[320px] flex-none overflow-hidden rounded-[14px] border border-white/[0.16] bg-[#101014] shadow-[0_10px_26px_rgba(0,0,0,0.42)]"
+          >
+            <img
+              src={item.urlThumb}
+              alt=""
+              loading="lazy"
+              className="block h-full w-full object-cover"
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function GalleryCard({ item }: { item: WallpaperItem }) {
+function FaqRow({
+  q,
+  a,
+  open,
+  onToggle,
+}: {
+  q: string;
+  a: string;
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
-    <figure className="group relative m-0 aspect-[16/10] overflow-hidden rounded-xl border border-line bg-panel">
-      <img
-        src={item.urlThumb}
-        alt={item.name}
-        loading="lazy"
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      {item.kind === "live" && (
-        <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur">
-          <HugeiconsIcon icon={PlayIcon} size={10} />
-          Live
-        </span>
-      )}
-      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
-        <p className="text-xs font-medium text-white">{item.name}</p>
-        <p className="text-[10px] text-white/60">{item.category}</p>
-      </figcaption>
-    </figure>
-  );
-}
-
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-line">
+    <div className="border-b border-white/[0.08]">
       <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-4 py-5 text-left text-[15px] font-medium text-fg transition-colors hover:text-white"
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-5 border-0 bg-transparent px-0.5 py-[22px] text-left text-[15px] font-semibold text-[#eaeaef]"
       >
         {q}
-        <HugeiconsIcon
-          icon={ArrowDown01Icon}
-          size={16}
-          className={`shrink-0 text-faint transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <span
+          aria-hidden="true"
+          className="flex-none text-xl font-normal text-[#7a7a85] transition-transform duration-[250ms]"
+          style={{ transform: open ? "rotate(45deg)" : "none" }}
+        >
+          +
+        </span>
       </button>
-      {open && <p className="pb-5 text-sm leading-relaxed text-muted">{a}</p>}
+      {open && (
+        <p className="m-0 pb-6 pl-0.5 pr-11 text-[14.5px] leading-[1.62] text-[#8f8f99] text-pretty">
+          {a}
+        </p>
+      )}
     </div>
   );
 }
@@ -208,331 +308,515 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 function Landing() {
   const showcase = Route.useLoaderData();
-  const picks: WallpaperItem[] = showcase?.picks ?? [];
-  const stats = showcase?.stats ?? null;
-  const gallery = [...(showcase?.featured ?? []), ...picks]
-    .filter((item, i, arr) => arr.findIndex((x) => x.id === item.id) === i)
-    .slice(0, 12);
-  const heroLive = [...picks, ...(showcase?.featured ?? [])]
-    .filter((x) => x.kind === "live")
-    .sort((a, b) => (a.sizeBytes ?? 0) - (b.sizeBytes ?? 0))[0];
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const statCards = stats
-    ? [
-        { value: `${stats.total}+`, label: "Wallpapers in the catalog" },
-        { value: stats.downloads.toLocaleString("en-US"), label: "Wallpapers downloaded" },
-        { value: String(stats.live), label: "Live video wallpapers" },
-        { value: String(stats.uhd), label: "True 4K wallpapers" },
-        { value: String(stats.categories), label: "Curated categories" },
-      ]
-    : [];
+  // The two gallery marquees run on the catalog's featured wallpapers. Each row
+  // is padded to 7 tiles so the duplicated track stays wider than the viewport,
+  // and row B starts half a lap in so the rows never line up.
+  const featured = showcase?.featured ?? [];
+  const rowA = marqueeTiles(featured, 0);
+  const rowB = marqueeTiles(featured, Math.ceil(featured.length / 2));
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      {/* ------------------------------- nav ------------------------------- */}
-      <nav
-        id="site-nav"
-        className="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink/70 backdrop-blur-xl"
-      >
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
-          <a href="#hero-section" className="flex items-center gap-2.5 no-underline">
-            <Logo size={24} />
-            <span className="text-sm font-semibold tracking-tight text-fg">OhMyWallpaper</span>
-          </a>
-          <div className="hidden items-center gap-7 text-[13px] text-muted sm:flex">
-            <a href="#feature-grid" className="transition-colors hover:text-fg">
-              Features
-            </a>
-            <a href="#gallery-section" className="transition-colors hover:text-fg">
-              Gallery
-            </a>
-            <a href="#faq-section" className="transition-colors hover:text-fg">
-              FAQ
-            </a>
-          </div>
-          <a
-            href="#download-section"
-            className="rounded-full bg-white px-4 py-1.5 text-[13px] font-semibold text-black transition-transform hover:scale-[1.03]"
-          >
-            Download
-          </a>
-        </div>
-      </nav>
+    <div className="relative min-h-screen overflow-x-clip bg-[#050505] font-body text-[#f2f2f4]">
+      {/* fixed aurora backdrop */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(58vw 58vw at 6% -8%,rgba(168,85,247,0.26),transparent 62%),radial-gradient(54vw 54vw at 106% 34%,rgba(59,130,246,0.24),transparent 62%),radial-gradient(52vw 52vw at 20% 112%,rgba(255,95,162,0.18),transparent 62%),radial-gradient(70vw 50vw at 50% 55%,rgba(120,110,255,0.10),transparent 70%)",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
 
-      {/* ------------------------------- hero ------------------------------ */}
-      <header id="hero-section" className="relative px-5 pb-24 pt-28 text-center">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[560px] opacity-30"
+      <div className="relative z-10">
+        {/* ------------------------------- nav ------------------------------- */}
+        <nav
+          id="site-nav"
+          className="sticky top-[14px] z-50 mx-auto mt-[14px] flex w-[calc(100%-32px)] max-w-[1180px] items-center justify-between gap-6 rounded-full py-2.5 pl-5 pr-3"
           style={{
             background:
-              "radial-gradient(60% 50% at 50% 0%, rgba(76,141,255,0.35), transparent 70%)",
+              "linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.045))",
+            backdropFilter: "blur(28px) saturate(180%)",
+            WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            border: "1px solid rgba(255,255,255,0.14)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.28),0 14px 40px rgba(0,0,0,0.45)",
           }}
-        />
-        <div className="relative mx-auto max-w-3xl">
-          <DesktopMockup video={heroLive?.urlFull ?? null} poster={heroLive?.urlThumb ?? null} />
-
-          <div className="mt-10 flex justify-center">
-            <span className="rounded-2xl shadow-[0_0_60px_rgba(76,141,255,0.55)]">
-              <Logo size={56} />
+        >
+          <a href="#top" className="flex items-center gap-2.5 text-[#f2f2f4] no-underline">
+            <img
+              src="/landing/logo-96.png"
+              alt="OhMyWallpaper"
+              width={30}
+              height={30}
+              className="block h-[30px] w-[30px]"
+            />
+            <span className="font-display text-base font-semibold tracking-[-0.005em]">
+              OhMyWallpaper
             </span>
+          </a>
+          <div className="hidden items-center gap-[30px] md:flex">
+            {[
+              ["Features", "#features"],
+              ["Gallery", "#gallery"],
+              ["Pricing", "#pricing"],
+              ["FAQ", "#faq"],
+            ].map(([label, href]) => (
+              <a
+                key={href}
+                href={href}
+                className="text-sm font-medium text-[#8f8f99] no-underline transition-colors hover:text-[#f2f2f4]"
+              >
+                {label}
+              </a>
+            ))}
           </div>
-          <h1 className="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl">OhMyWallpaper</h1>
-          <h2 className="mt-2 text-xl font-medium text-muted sm:text-2xl">
-            Live Wallpaper for Windows
-          </h2>
-          <p className="mx-auto mt-5 max-w-md text-[15px] leading-relaxed text-faint">
-            The live wallpaper app for Windows that won't touch your{" "}
-            <HugeiconsIcon icon={BatteryFullIcon} size={15} className="inline text-muted" /> battery.
-            Per-monitor control, native Rust engine — no subscription, low{" "}
-            <HugeiconsIcon icon={CpuIcon} size={15} className="inline text-muted" /> CPU, no login.
-          </p>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              id="btn-download-hero"
-              href="#download-section"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-black shadow-[0_4px_30px_rgba(255,255,255,0.15)] transition-transform hover:scale-[1.03]"
-            >
-              <HugeiconsIcon icon={Download01Icon} size={17} />
-              Download for Windows
-            </a>
-            <a
-              href="#gallery-section"
-              className="inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3 text-sm font-medium text-fg transition-colors hover:bg-white/5"
-            >
-              Browse wallpapers
-            </a>
-          </div>
-          <p className="mt-5 text-xs text-faint">
-            Free to use · Requires Windows 10 (1809+) or Windows 11 with WebView2
-          </p>
-        </div>
-      </header>
-
-      {/* ---------------------------- app mockup ---------------------------- */}
-      <section id="app-section" className="px-5 py-20">
-        <div className="mx-auto max-w-5xl">
-          <Eyebrow>The app</Eyebrow>
-          <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-            See it in action
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-center text-[15px] text-muted">
-            A frameless, Fluent-dark app that feels like part of Windows — browse, apply, done.
-          </p>
-
-          <div
-            id="app-window-mockup"
-            className="mx-auto mt-12 max-w-3xl overflow-hidden rounded-2xl border border-line-strong bg-[#101113] shadow-[0_40px_100px_-30px_rgba(0,0,0,0.9)]"
+          <a
+            href="#download"
+            className="flex flex-none items-center gap-2 rounded-full bg-[#f4f4f6] px-[18px] py-[9px] text-sm font-semibold text-[#0a0a0c] no-underline"
           >
-            {/* title bar */}
-            <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <Logo size={18} />
-                <div className="ml-3 hidden items-center gap-1 rounded-full bg-white/5 p-1 sm:flex">
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-fg">
-                    Home
-                  </span>
-                  <span className="px-3 py-1 text-[11px] text-muted">Explore</span>
-                  <span className="px-3 py-1 text-[11px] text-muted">Library</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-faint">
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/25" />
-              </div>
-            </div>
-            {/* content grid */}
-            <div className="grid grid-cols-2 gap-2.5 p-4 sm:grid-cols-4">
-              {(gallery.length > 0 ? gallery.slice(0, 8) : Array.from({ length: 8 })).map(
-                (item, i) => {
-                  const w = item as WallpaperItem | undefined;
-                  return (
-                    <div
-                      key={w?.id ?? i}
-                      className="relative aspect-[16/10] overflow-hidden rounded-lg border border-line bg-panel"
-                    >
-                      {w ? (
-                        <img
-                          src={w.urlThumb}
-                          alt=""
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div
-                          className="h-full w-full"
-                          style={{
-                            background: `linear-gradient(135deg, hsl(${i * 40 + 200},35%,16%), hsl(${i * 40 + 240},40%,8%))`,
-                          }}
-                        />
-                      )}
-                      {w?.kind === "live" && (
-                        <span className="absolute left-1.5 top-1.5 rounded bg-black/60 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white">
-                          Live
-                        </span>
-                      )}
-                    </div>
-                  );
-                },
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+            <WindowsGlyph />
+            Download
+          </a>
+        </nav>
 
-      {/* ------------------------------ gallery ----------------------------- */}
-      <section id="gallery-section" className="px-5 py-20">
-        <div className="mx-auto max-w-5xl">
-          <Eyebrow>Gallery</Eyebrow>
-          <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-            Wallpapers you'll love
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-center text-[15px] text-muted">
-            {gallery.length > 0
-              ? "A growing collection of static 4K and live wallpapers, curated for quality — served straight from the catalog."
-              : "The catalog API is offline right now — launch ohmywallpaper-api to see live data here."}
-          </p>
-          {gallery.length > 0 && (
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {gallery.map((item) => (
-                <GalleryCard key={item.id} item={item} />
+        {/* ------------------------------- hero ------------------------------ */}
+        <section id="top" className="relative px-8 pt-16 text-center">
+          <div
+            aria-hidden="true"
+            className="hero-glow pointer-events-none absolute left-1/2 top-[-140px] h-[560px] w-[1100px] -translate-x-1/2 rounded-[50%] blur-[20px]"
+            style={{
+              background:
+                "radial-gradient(ellipse at center,rgba(120,80,255,0.20),rgba(40,120,255,0.10) 45%,rgba(0,0,0,0) 70%)",
+            }}
+          />
+          <div className="hero-rise relative mx-auto max-w-[900px]">
+            <img
+              src="/landing/logo-320.png"
+              alt=""
+              width={84}
+              height={84}
+              className="mx-auto mb-[26px] block h-[84px] w-[84px] drop-shadow-[0_12px_40px_rgba(120,80,255,0.45)]"
+            />
+            <div
+              className="mb-[26px] inline-flex items-center gap-[9px] rounded-full py-1.5 pl-2 pr-3.5 text-[12.5px] font-semibold text-[#c6c6d0]"
+              style={GLASS_PILL}
+            >
+              <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-[#4aa8ff]" />
+              Free for Windows 10 &amp; 11
+            </div>
+            <h1 className="font-display m-0 mb-[22px] text-[clamp(46px,7.2vw,88px)] font-semibold leading-[0.98] tracking-[-0.035em] text-balance">
+              Let your wallpaper
+              <br />
+              tell a story.
+            </h1>
+            <p className="mx-auto mb-[34px] max-w-[560px] text-[16.5px] leading-[1.58] text-[#8f8f99] text-pretty">
+              4K and live wallpapers for your Windows PC. No ads. No account. No
+              limits — just a desktop you actually want to look at.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a href="#download" className={`${CTA_LIGHT} px-[26px] py-3.5 no-underline`}>
+                <WindowsGlyph size={15} />
+                Download for Windows
+              </a>
+              <a
+                href="#demo"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-[15px] font-semibold text-[#f0f0f4] no-underline"
+                style={GLASS_BUTTON}
+              >
+                See it in action
+              </a>
+            </div>
+            <p className="mt-5 text-[13px] text-[#5f5f69]">
+              Free download · 42 MB installer · Windows 10 and 11
+            </p>
+            <div className="mt-[34px] flex flex-wrap items-center justify-center gap-2">
+              {PERF_CHIPS.map((chip) => (
+                <span
+                  key={chip}
+                  className="flex items-center gap-2 rounded-full px-[15px] py-2 text-[13px] font-semibold text-[#c4c4ce]"
+                  style={GLASS_PILL}
+                >
+                  <span className="h-[5px] w-[5px] flex-none rounded-full bg-[#22c55e]" />
+                  {chip}
+                </span>
               ))}
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+          <div className="relative mx-auto mt-16 max-w-[1180px]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-[8%] left-[6%] right-[6%] -bottom-[6%] rounded-[40px] blur-[70px]"
+              style={{
+                background:
+                  "linear-gradient(120deg,rgba(255,95,162,0.22),rgba(168,85,247,0.22),rgba(59,130,246,0.22))",
+              }}
+            />
+            <img
+              src="/landing/app-home.webp"
+              alt="OhMyWallpaper home screen"
+              width={1373}
+              height={840}
+              className="relative block w-full rounded-[14px] shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
+            />
+          </div>
+        </section>
 
-      {/* ------------------------------- stats ------------------------------ */}
-      {statCards.length > 0 && (
-        <section id="stats-section" className="px-5 py-20">
-          <div className="mx-auto max-w-5xl">
-            <Eyebrow>Catalog</Eyebrow>
-            <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-              OhMyWallpaper in numbers
-            </h2>
-            <p className="mx-auto mt-3 max-w-md text-center text-[15px] text-muted">
-              Live figures from the catalog, updated as the library grows.
+        {/* ------------------------------- demo ------------------------------ */}
+        <section id="demo" className="px-8 pt-[130px] text-center">
+          <div className={EYEBROW}>Live wallpapers</div>
+          <h2 className={`${H2} m-0 mb-[18px]`}>
+            It runs on your desktop,
+            <br />
+            not in a browser tab.
+          </h2>
+          <p className={`mx-auto max-w-[560px] ${LEAD}`}>
+            Set a still or a looping 4K video as your background. Playback pauses
+            the moment a window covers it, so games and battery stay untouched.
+          </p>
+          <div className="relative mx-auto mt-14 max-w-[1180px]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-[10%] left-[8%] right-[8%] -bottom-[4%] rounded-[40px] blur-[60px]"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center,rgba(59,130,246,0.28),rgba(0,0,0,0) 70%)",
+              }}
+            />
+            <img
+              src="/landing/desktop-demo.webp"
+              alt="OhMyWallpaper running over a live desktop wallpaper"
+              width={2000}
+              height={998}
+              loading="lazy"
+              className="relative block w-full rounded-[14px] shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
+            />
+          </div>
+        </section>
+
+        {/* ------------------------------ screens ---------------------------- */}
+        <section id="screens" className="px-8 pt-[130px] text-center">
+          <div className={EYEBROW}>The app</div>
+          <h2 className={`${H2} m-0 mb-[34px]`}>Explore, without the clutter.</h2>
+          <div className="mx-auto max-w-[1080px]">
+            <img
+              src="/landing/app-explore.webp"
+              alt="OhMyWallpaper explore screen"
+              width={1359}
+              height={841}
+              loading="lazy"
+              className="block w-full rounded-[14px] shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
+            />
+            <p className="mx-auto mt-[22px] max-w-[520px] text-[14.5px] leading-[1.58] text-[#8f8f99]">
+              Explore filters by live, 4K or QHD, then drops you into seven
+              categories and the newest uploads.
             </p>
-            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              {statCards.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-2xl border border-line bg-gradient-to-b from-panel to-ink p-6 text-center"
+          </div>
+        </section>
+
+        {/* ------------------------------ gallery ---------------------------- */}
+        <section id="gallery" className="pt-[130px]">
+          <div className="mx-auto max-w-[1180px] px-8">
+            <div className={EYEBROW}>Gallery</div>
+            <h2 className={`${H2} m-0 mb-[18px] max-w-[620px]`}>
+              A library worth
+              <br />
+              scrolling through.
+            </h2>
+            <p className={`m-0 max-w-[480px] ${LEAD}`}>
+              Nature, Space, City, Abstract, Anime, Minimal and Dark — every piece
+              checked at full resolution before it lands in the app.
+            </p>
+          </div>
+          {rowA.length > 0 ? (
+            <div className="mt-[52px] flex flex-col gap-4" style={MARQUEE_MASK}>
+              <MarqueeRow items={rowA} direction="a" duration={SPEED_A} />
+              <MarqueeRow items={rowB} direction="b" duration={SPEED_B} />
+            </div>
+          ) : (
+            <p className="mx-auto mt-[52px] max-w-[1180px] px-8 text-[14.5px] text-[#5f5f69]">
+              No featured wallpapers to show right now — feature a few in the admin
+              catalog and they will appear here.
+            </p>
+          )}
+        </section>
+
+        {/* ----------------------------- features ---------------------------- */}
+        <section id="features" className="px-8 pt-[130px]">
+          <div className="mx-auto max-w-[1180px]">
+            <div className="text-center">
+              <div className={EYEBROW}>Features</div>
+              <h2 className={`${H2} m-0 mb-[18px]`}>
+                Everything you need.
+                <br />
+                <span
+                  style={{
+                    background: "linear-gradient(90deg,#ff5fa2,#a855f7,#3b82f6)",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    color: "transparent",
+                  }}
                 >
-                  <p className="text-3xl font-semibold tracking-tight">{s.value}</p>
-                  <p className="mt-1.5 text-xs text-muted">{s.label}</p>
+                  Nothing you don't.
+                </span>
+              </h2>
+              <p className={`mx-auto max-w-[520px] ${LEAD}`}>
+                Built for Windows, tuned for speed, and stripped of everything a
+                wallpaper app doesn't need.
+              </p>
+            </div>
+            <div className="mt-16 grid grid-cols-[repeat(auto-fit,minmax(min(330px,100%),1fr))] gap-3.5">
+              {FEATURES.map((f) => (
+                <div key={f.title} className="rounded-[20px] p-7" style={GLASS_CARD}>
+                  <div
+                    className="mb-5 flex h-[38px] w-[38px] items-center justify-center rounded-[11px]"
+                    style={{ background: f.gradient }}
+                  >
+                    {f.glyph}
+                  </div>
+                  <h3 className="font-display m-0 mb-2 text-base font-semibold tracking-[-0.01em]">
+                    {f.title}
+                  </h3>
+                  <p className="m-0 text-[13.8px] leading-[1.6] text-[#84848e]">{f.body}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
-      )}
 
-      {/* ------------------------------ features ---------------------------- */}
-      <section id="feature-grid" className="px-5 py-20">
-        <div className="mx-auto max-w-4xl">
-          <Eyebrow>Features</Eyebrow>
-          <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-            Everything you need.
-            <br />
-            <span className="text-accent">Nothing you don't.</span>
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-center text-[15px] text-muted">
-            OhMyWallpaper is engineered for performance, privacy, and simplicity.
-          </p>
-          <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div key={f.title}>
-                <span
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-[10px]"
-                  style={{ backgroundColor: `${f.tint}22`, color: f.tint }}
-                >
-                  <HugeiconsIcon icon={f.icon} size={18} />
-                </span>
-                <h3 className="mt-3.5 text-[15px] font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------- faq ------------------------------- */}
-      <section id="faq-section" className="px-5 py-20">
-        <div className="mx-auto max-w-2xl">
-          <Eyebrow>FAQ</Eyebrow>
-          <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-            Questions? We've got answers.
-          </h2>
-          <div className="mt-10">
-            {FAQS.map((f) => (
-              <FaqItem key={f.q} q={f.q} a={f.a} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------------------- final CTA ----------------------------- */}
-      <section id="download-section" className="relative px-5 py-28 text-center">
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[420px] opacity-25"
-          style={{
-            background:
-              "radial-gradient(55% 60% at 50% 100%, rgba(76,141,255,0.4), transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-xl">
-          <div className="flex justify-center">
-            <span className="rounded-2xl shadow-[0_0_70px_rgba(76,141,255,0.6)]">
-              <Logo size={48} />
-            </span>
-          </div>
-          <h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ready to transform your desktop?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-[15px] text-muted">
-            Cinematic live wallpapers for Windows — free, light, and yours in seconds.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <span
-              id="btn-download-installer"
-              className="inline-flex cursor-default items-center gap-2 rounded-full bg-white/12 px-6 py-3 text-sm font-semibold text-white/75"
+        {/* ------------------------------ pricing ---------------------------- */}
+        <section id="pricing" className="px-8 pt-[130px]">
+          <div className="mx-auto max-w-[940px]">
+            <div className="text-center">
+              <div className={EYEBROW}>Pricing</div>
+              <h2 className={`${H2} m-0 mb-[18px]`}>Completely free.</h2>
+              <p className={`mx-auto max-w-[480px] ${LEAD}`}>
+                No paid tier, no subscription, no trial that runs out. Every
+                wallpaper and every feature is included.
+              </p>
+            </div>
+            <div
+              className="mx-auto mt-[60px] max-w-[520px] rounded-[26px] p-10 text-center"
+              style={{
+                background:
+                  "linear-gradient(180deg,rgba(168,85,247,0.16),rgba(255,255,255,0.035))",
+                backdropFilter: "blur(28px) saturate(180%)",
+                WebkitBackdropFilter: "blur(28px) saturate(180%)",
+                border: "1px solid rgba(198,140,255,0.34)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.28),0 24px 60px rgba(0,0,0,0.42)",
+              }}
             >
-              <HugeiconsIcon icon={Download01Icon} size={17} />
-              Installer (.exe / .msi) — coming soon
-            </span>
+              <div className="mb-2 flex items-baseline justify-center gap-[9px]">
+                <span className="font-display text-[62px] font-semibold leading-none tracking-[-0.04em]">
+                  $0
+                </span>
+                <span className="text-[15px] text-[#6d6d77]">forever</span>
+              </div>
+              <p className="m-0 mb-8 text-[14.5px] text-[#84848e]">
+                Everything, for everyone.
+              </p>
+              <div className="mb-[34px] grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-[13px] text-left">
+                {PLAN_INCLUDES.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-start gap-[11px] text-sm text-[#c2c2cb]"
+                  >
+                    <span className="leading-[1.5] text-[#c084fc]">✓</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <a
+                href="#download"
+                className="block rounded-full bg-[#f4f4f6] py-3.5 text-center text-[15px] font-semibold text-[#0a0a0c] no-underline"
+              >
+                Download for Windows
+              </a>
+              <p className="m-0 mt-4 text-[12.5px] text-[#5f5f69]">
+                No account · No ads · No subscription
+              </p>
+            </div>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-faint">
-            <span className="inline-flex items-center gap-1.5">
-              <HugeiconsIcon icon={LockIcon} size={13} /> No account needed
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <HugeiconsIcon icon={BatteryEcoChargingIcon} size={13} /> Battery friendly
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <HugeiconsIcon icon={GridViewIcon} size={13} /> Free catalog built in
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <HugeiconsIcon icon={Image01Icon} size={13} /> Bring your own media
-            </span>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ------------------------------- footer ------------------------------ */}
-      <footer className="border-t border-line px-5 py-10">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 sm:flex-row">
-          <div className="flex items-center gap-2.5">
-            <Logo size={20} />
-            <span className="text-sm font-semibold tracking-tight text-fg">OhMyWallpaper</span>
+        {/* ------------------------------ reviews ---------------------------- */}
+        <section id="reviews" className="pt-[130px]">
+          <div className="px-8 text-center">
+            <div className={EYEBROW}>Loved by users</div>
+            <h2 className={`${H2} m-0 mb-[18px]`}>What people are saying</h2>
+            <p className={`mx-auto max-w-[520px] ${LEAD}`}>
+              Join the Windows users who stopped settling for the default
+              background.
+            </p>
           </div>
-          <p className="text-xs text-faint">
-            © {new Date().getFullYear()} YStudio · Windows is a trademark of Microsoft
-            Corporation.
-          </p>
-        </div>
-      </footer>
+          <div
+            className="mt-14 overflow-hidden"
+            style={{
+              WebkitMaskImage:
+                "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
+              maskImage:
+                "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
+            }}
+          >
+            <div
+              className="marquee-a flex w-max gap-4"
+              style={{ "--mq-duration": SPEED_C } as React.CSSProperties}
+            >
+              {[...QUOTES, ...QUOTES].map((q, i) => (
+                <div
+                  key={`${q.name}-${i}`}
+                  className="flex w-[330px] flex-none flex-col justify-between gap-[22px] rounded-[20px] p-[26px]"
+                  style={GLASS_CARD}
+                >
+                  <div>
+                    <div className="mb-3.5 text-xs tracking-[2px] text-[#f5b93b]">
+                      ★★★★★
+                    </div>
+                    <p className="m-0 text-[13.8px] leading-[1.6] text-[#d2d2d9]">
+                      {q.text}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-[11px] border-t border-white/[0.07] pt-4">
+                    <div className="h-[30px] w-[30px] flex-none rounded-full bg-gradient-to-br from-[#3b82f6] to-[#a855f7]" />
+                    <div>
+                      <div className="text-[13.5px] font-semibold text-[#eaeaef]">
+                        {q.name}
+                      </div>
+                      <div className="text-xs text-[#6d6d77]">{q.role}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* -------------------------------- faq ------------------------------ */}
+        <section id="faq" className="px-8 pt-[130px]">
+          <div className="mx-auto max-w-[760px]">
+            <div className="mb-14 text-center">
+              <div className={EYEBROW}>FAQ</div>
+              <h2 className={`${H2} m-0`}>Questions? Answered.</h2>
+            </div>
+            {FAQS.map(([q, a], i) => (
+              <FaqRow
+                key={q}
+                q={q}
+                a={a}
+                open={openFaq === i}
+                onToggle={() => setOpenFaq((cur) => (cur === i ? null : i))}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* ------------------------------ download --------------------------- */}
+        <section
+          id="download"
+          className="relative overflow-hidden px-8 pb-[120px] pt-[150px] text-center"
+        >
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-[-260px] left-1/2 h-[520px] w-[1000px] -translate-x-1/2 rounded-[50%] blur-[30px]"
+            style={{
+              background:
+                "radial-gradient(ellipse at center,rgba(168,85,247,0.20),rgba(59,130,246,0.12) 45%,rgba(0,0,0,0) 72%)",
+            }}
+          />
+          <div className="relative">
+            <img
+              src="/landing/logo-320.png"
+              alt=""
+              width={70}
+              height={70}
+              loading="lazy"
+              className="mx-auto mb-[30px] block h-[70px] w-[70px] drop-shadow-[0_12px_40px_rgba(120,80,255,0.45)]"
+            />
+            <h2 className="font-display m-0 mb-5 text-[clamp(38px,5.4vw,68px)] font-semibold leading-[1.02] tracking-[-0.035em]">
+              Give your desktop
+              <br />
+              something to say.
+            </h2>
+            <p className={`mx-auto mb-[34px] max-w-[520px] ${LEAD}`}>
+              Download OhMyWallpaper free and set your first wallpaper in under a
+              minute.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a href="#top" className={`${CTA_LIGHT} px-7 py-[15px] no-underline`}>
+                <WindowsGlyph size={15} />
+                Download for Windows
+              </a>
+              <a
+                href="#screens"
+                className="inline-flex items-center gap-2 rounded-full px-[26px] py-[15px] text-[15px] font-semibold text-[#f0f0f4] no-underline"
+                style={GLASS_BUTTON}
+              >
+                Watch the demo
+              </a>
+            </div>
+            <div className="mt-[26px] flex flex-wrap items-center justify-center gap-x-[26px] gap-y-2 text-[13px] text-[#6d6d77]">
+              {["No account required", "No subscription", "Windows 10 and 11"].map(
+                (item) => (
+                  <span key={item} className="flex items-center gap-[7px]">
+                    <span className="text-[#22c55e]">✓</span>
+                    {item}
+                  </span>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------- footer ---------------------------- */}
+        <footer className="px-8 pb-14">
+          <div className="mx-auto max-w-[1180px] border-t border-white/[0.07] pt-[26px]">
+            <p className="m-0 mb-3.5 text-[12.5px] text-[#5c5c66]">
+              All artwork and metadata remain the property of their respective
+              owners.
+            </p>
+            <div className="flex flex-wrap items-center gap-3.5 pb-[26px] text-[12.5px]">
+              <a href="#faq" className="text-[#82828c] no-underline hover:text-[#c4c4ce]">
+                Terms &amp; Conditions
+              </a>
+              <span className="text-[#3a3a42]">·</span>
+              <a href="#faq" className="text-[#82828c] no-underline hover:text-[#c4c4ce]">
+                EULA
+              </a>
+              <span className="text-[#3a3a42]">·</span>
+              <a href="#faq" className="text-[#82828c] no-underline hover:text-[#c4c4ce]">
+                Privacy Policy
+              </a>
+              <span className="text-[#3a3a42]">·</span>
+              <a href="#faq" className="text-[#82828c] no-underline hover:text-[#c4c4ce]">
+                Contact
+              </a>
+            </div>
+          </div>
+          <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-5 border-t border-white/[0.07] pt-[22px]">
+            <div className="flex items-center gap-[11px]">
+              <img
+                src="/landing/logo-96.png"
+                alt=""
+                width={24}
+                height={24}
+                loading="lazy"
+                className="block h-6 w-6"
+              />
+              <span className="text-[12.5px] text-[#5c5c66]">
+                <strong className="font-semibold text-[#a8a8b2]">OhMyWallpaper</strong>{" "}
+                is a simple, Windows-native app made with care. ©{" "}
+                {new Date().getFullYear()}
+              </span>
+            </div>
+            <span className="text-xs font-semibold tracking-[0.22em] text-[#5c5c66]">
+              OHMYWALLPAPER
+            </span>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
