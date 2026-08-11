@@ -250,13 +250,20 @@ const FAQS: [string, string][] = [
 const GALLERY_ROW_TILES = 12;
 
 /**
- * Marquee durations. The design's 55s base was tuned for 320px tiles; the gallery
- * now runs 440px ones, so its two speeds are scaled by the same factor to hold the
- * original ~73 px/s. The reviews row keeps 83s — its cards did not change size.
+ * Cards in one lap of the reviews marquee. 12 × 346px = 4152px, so a lap stays wider
+ * than a 4K viewport and the same quote is never on screen twice.
+ */
+const REVIEW_LAP_CARDS = 12;
+
+/**
+ * Marquee durations, all scaled to hold the design's original speeds. The 55s base was
+ * tuned for 320px tiles and the gallery now runs 440px ones, so its two speeds grew by
+ * the same factor to stay at ~73 px/s. The reviews lap doubled in length to clear wide
+ * viewports, so 83s doubled too, holding its slower ~25 px/s.
  */
 const SPEED_A = "75s";
 const SPEED_B = "94s";
-const SPEED_C = "83s";
+const SPEED_C = "166s";
 
 /* -------------------------------- fragments ------------------------------- */
 
@@ -325,19 +332,24 @@ function Screenshot({
 }
 
 /**
- * `items` repeated until the row holds at least `min` tiles. Padding happens in
- * whole laps so no wallpaper ever lands next to a copy of itself, which a partial
- * lap would cause at the seam.
+ * One marquee lap: `items` repeated until it holds at least `min` entries. Repeating
+ * happens in whole passes so nothing ever lands next to a copy of itself, which a
+ * partial pass would cause at the seam. The caller renders the lap twice, and the
+ * lap has to be wider than the viewport or the same entry shows up twice at once.
  */
-function marqueeTiles(items: WallpaperItem[], min = GALLERY_ROW_TILES) {
+function marqueeLap<T>(items: T[], min: number): T[] {
   if (items.length === 0) return [];
-  const laps = Math.max(1, Math.ceil(min / items.length));
-  return Array.from({ length: items.length * laps }, (_, i) => items[i % items.length]);
+  const passes = Math.max(1, Math.ceil(min / items.length));
+  return Array.from({ length: items.length * passes }, (_, i) => items[i % items.length]);
 }
 
 /**
  * One auto-scrolling row of wallpapers. `direction` is the way the tiles travel:
  * `marquee-a` walks the track left, `marquee-b` walks it right.
+ *
+ * The 16px gap is a margin on every tile rather than `gap` on the track. `gap` only
+ * sits *between* items, which leaves the track 16px short of two whole laps and makes
+ * the `translateX(-50%)` loop jump by 8px each time round.
  */
 function MarqueeRow({
   items,
@@ -351,13 +363,13 @@ function MarqueeRow({
   return (
     <div className="overflow-hidden">
       <div
-        className={`flex w-max gap-4 ${direction === "left" ? "marquee-a" : "marquee-b"}`}
+        className={`flex w-max ${direction === "left" ? "marquee-a" : "marquee-b"}`}
         style={{ "--mq-duration": duration } as React.CSSProperties}
       >
         {[...items, ...items].map((item, i) => (
           <div
             key={`${item.id}-${i}`}
-            className="h-[206px] w-[440px] flex-none overflow-hidden rounded-[16px] border border-white/[0.16] bg-[#101014] shadow-[0_10px_26px_rgba(0,0,0,0.42)]"
+            className="mr-4 h-[206px] w-[440px] flex-none overflow-hidden rounded-[16px] bg-[#101014] shadow-[0_10px_26px_rgba(0,0,0,0.42)]"
           >
             <img
               src={item.urlThumb}
@@ -440,8 +452,9 @@ function Landing() {
     featured.length >= 4
       ? [featured.slice(0, half), featured.slice(half)]
       : [featured, featured];
-  const rowA = marqueeTiles(listA);
-  const rowB = marqueeTiles(listB);
+  const rowA = marqueeLap(listA, GALLERY_ROW_TILES);
+  const rowB = marqueeLap(listB, GALLERY_ROW_TILES);
+  const reviewLap = marqueeLap(QUOTES, REVIEW_LAP_CARDS);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -866,14 +879,15 @@ function Landing() {
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.8, ease: EASE }}
             >
+              {/* gap lives on the cards, not the track — see MarqueeRow */}
               <div
-                className="marquee-a flex w-max gap-4"
+                className="marquee-a flex w-max"
                 style={{ "--mq-duration": SPEED_C } as React.CSSProperties}
               >
-                {[...QUOTES, ...QUOTES].map((q, i) => (
+                {[...reviewLap, ...reviewLap].map((q, i) => (
                   <div
                     key={`${q.name}-${i}`}
-                    className="flex w-[330px] flex-none flex-col justify-between gap-[22px] rounded-[20px] p-[26px]"
+                    className="mr-4 flex w-[330px] flex-none flex-col justify-between gap-[22px] rounded-[20px] p-[26px]"
                     style={GLASS_CARD}
                   >
                     <div>
