@@ -228,10 +228,18 @@ function WindowsGlyph({ size = 13 }: { size?: number }) {
   );
 }
 
-/** `count` tiles taken from `items`, wrapping around and starting at `offset`. */
-function marqueeTiles(items: WallpaperItem[], offset: number, count = 7) {
+/**
+ * `items` repeated from `offset` until the row holds at least `min` tiles. Padding
+ * happens in whole laps so no wallpaper ever lands next to a copy of itself, which
+ * a partial lap would cause at the seam.
+ */
+function marqueeTiles(items: WallpaperItem[], offset: number, min = 7) {
   if (items.length === 0) return [];
-  return Array.from({ length: count }, (_, i) => items[(i + offset) % items.length]);
+  const laps = Math.max(1, Math.ceil(min / items.length));
+  return Array.from(
+    { length: items.length * laps },
+    (_, i) => items[(i + offset) % items.length],
+  );
 }
 
 function MarqueeRow({
@@ -310,9 +318,9 @@ function Landing() {
   const showcase = Route.useLoaderData();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // The two gallery marquees run on the catalog's featured wallpapers. Each row
-  // is padded to 7 tiles so the duplicated track stays wider than the viewport,
-  // and row B starts half a lap in so the rows never line up.
+  // The two gallery marquees run on the catalog's featured wallpapers only. Each row
+  // is padded to at least 7 tiles so the duplicated track stays wider than the
+  // viewport, and row B starts half a lap in so the rows never line up.
   const featured = showcase?.featured ?? [];
   const rowA = marqueeTiles(featured, 0);
   const rowB = marqueeTiles(featured, Math.ceil(featured.length / 2));
