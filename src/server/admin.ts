@@ -71,13 +71,32 @@ export const createCategory = createServerFn({ method: "POST" })
     });
   });
 
+export interface CategoryPatch {
+  name?: string;
+  sortOrder?: number;
+  description?: string | null;
+  accent?: string | null;
+  coverWallpaperId?: string | null;
+}
+
 export const updateCategory = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string; patch: { name?: string; sortOrder?: number } }) => data)
+  .inputValidator((data: { id: string; patch: CategoryPatch }) => data)
   .handler(async ({ data }) => {
     return apiFetch<{ ok: true; item: Category }>(`/admin/categories/${data.id}`, {
       method: "PATCH",
       headers: { ...authHeaders(), "content-type": "application/json" },
       body: JSON.stringify(data.patch),
+    });
+  });
+
+/** Derive an accent from a cover image without saving it — for previewing in the editor. */
+export const autoAccent = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; wallpaperId: string | null }) => data)
+  .handler(async ({ data }) => {
+    return apiFetch<{ ok: true; accent: string }>(`/admin/categories/${data.id}/accent`, {
+      method: "POST",
+      headers: { ...authHeaders(), "content-type": "application/json" },
+      body: JSON.stringify({ wallpaperId: data.wallpaperId }),
     });
   });
 

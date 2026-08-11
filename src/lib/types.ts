@@ -4,6 +4,13 @@ export interface Category {
   name: string;
   sortOrder: number;
   count: number;
+  description: string | null;
+  /** `#rrggbb`; null lets the app fall back to its default accent. */
+  accent: string | null;
+  /** Explicit cover pick. Null means the resolved cover is the auto one. */
+  coverWallpaperId: string | null;
+  coverThumb: string | null;
+  coverFull: string | null;
 }
 
 export type WallpaperKind = "static" | "live";
