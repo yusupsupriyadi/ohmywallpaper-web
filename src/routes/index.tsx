@@ -40,6 +40,20 @@ const GLASS_PILL: React.CSSProperties = {
     "inset 0 1px 0 rgba(255,255,255,0.26),0 6px 16px rgba(0,0,0,0.25)",
 };
 
+/**
+ * The hero's Rust highlight. Same frosted pill, warmed to Rust orange so it reads as
+ * the claim the green performance chips follow from rather than one more of them.
+ */
+const RUST_PILL: React.CSSProperties = {
+  border: "1px solid rgba(247,76,0,0.45)",
+  background:
+    "linear-gradient(180deg,rgba(247,76,0,0.24),rgba(247,76,0,0.075))",
+  backdropFilter: "blur(18px) saturate(180%)",
+  WebkitBackdropFilter: "blur(18px) saturate(180%)",
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,0.24),0 6px 20px rgba(247,76,0,0.24)",
+};
+
 /** Frosted secondary button. */
 const GLASS_BUTTON: React.CSSProperties = {
   border: "1px solid rgba(255,255,255,0.16)",
@@ -266,6 +280,25 @@ const SPEED_B = "94s";
 const SPEED_C = "166s";
 
 /* -------------------------------- fragments ------------------------------- */
+
+/** A gear, for the Rust highlight. Dashed outer ring stands in for the teeth. */
+function GearGlyph({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true">
+      <circle
+        cx="8"
+        cy="8"
+        r="6.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeDasharray="1.5 2.2"
+      />
+      <circle cx="8" cy="8" r="3.9" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="8" cy="8" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
 
 function WindowsGlyph({ size = 13 }: { size?: number }) {
   return (
@@ -595,6 +628,17 @@ function Landing() {
                 Free download · 42 MB installer · Windows 10 and 11
               </motion.p>
               <div className="mt-[34px] flex flex-wrap items-center justify-center gap-2">
+                {/* the engine claim the rest of the row is a consequence of, so it leads */}
+                <motion.span
+                  className="flex items-center gap-2 rounded-full px-[15px] py-2 text-[13px] font-semibold text-[#ffd0b8]"
+                  style={RUST_PILL}
+                  initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.5, ease: EASE, delay: 0.48 }}
+                >
+                  <GearGlyph />
+                  Built on Rust
+                </motion.span>
                 {PERF_CHIPS.map((chip, i) => (
                   <motion.span
                     key={chip}
@@ -602,7 +646,7 @@ function Landing() {
                     style={GLASS_PILL}
                     initial={{ opacity: 0, y: 12, scale: 0.96 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ duration: 0.5, ease: EASE, delay: 0.48 + i * 0.07 }}
+                    transition={{ duration: 0.5, ease: EASE, delay: 0.55 + i * 0.07 }}
                   >
                     <span className="h-[5px] w-[5px] flex-none rounded-full bg-[#22c55e]" />
                     {chip}
