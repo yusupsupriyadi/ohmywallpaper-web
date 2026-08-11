@@ -210,6 +210,9 @@ const FAQS: [string, string][] = [
   ],
 ];
 
+/** Unique wallpapers per gallery marquee row; the loader fetches 2× this many. */
+const GALLERY_ROW_TILES = 12;
+
 /** Marquee durations, matching the design's 55s base and its 1.25×/1.5× steps. */
 const SPEED_A = "55s";
 const SPEED_B = "69s";
@@ -233,7 +236,7 @@ function WindowsGlyph({ size = 13 }: { size?: number }) {
  * whole laps so no wallpaper ever lands next to a copy of itself, which a partial
  * lap would cause at the seam.
  */
-function marqueeTiles(items: WallpaperItem[], min = 7) {
+function marqueeTiles(items: WallpaperItem[], min = GALLERY_ROW_TILES) {
   if (items.length === 0) return [];
   const laps = Math.max(1, Math.ceil(min / items.length));
   return Array.from({ length: items.length * laps }, (_, i) => items[i % items.length]);
@@ -317,9 +320,10 @@ function Landing() {
 
   // The two gallery marquees run on the catalog's featured wallpapers only, split
   // down the middle so the rows never show the same piece: the first half scrolls
-  // left, the second half scrolls right. Each row is then padded to at least 7 tiles
-  // so its duplicated track stays wider than the viewport. Under four featured a
-  // half would be one tile repeating, so both rows take the whole list instead.
+  // left, the second half scrolls right. With the loader's 24 that is 12 unique
+  // wallpapers per row. Short of that each row repeats its half in whole laps, and
+  // under four featured a half would be one tile over and over, so both rows take
+  // the whole list instead.
   const featured = showcase?.featured ?? [];
   const half = Math.ceil(featured.length / 2);
   const [listA, listB] =

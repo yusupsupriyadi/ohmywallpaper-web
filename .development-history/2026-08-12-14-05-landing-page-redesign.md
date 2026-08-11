@@ -22,11 +22,15 @@ accordion FAQ.
 ## Decisions
 
 - Gallery marquees render the catalog's **featured** wallpapers (live API data) instead of
-  the design's static `w0x`/`c0x` tiles. The list is split down the middle — first half in
-  the top row, second half in the bottom row — so the two rows never show the same piece.
-  Each row is then padded in whole laps to at least 7 tiles, keeping its duplicated track
-  wider than the viewport without ever placing a wallpaper next to a copy of itself.
-  Under four featured a half would be a single repeating tile, so both rows take the lot.
+  the design's static `w0x`/`c0x` tiles. The loader asks for 24 and the list is split down
+  the middle — 12 in the top row, 12 in the bottom — so the two rows never share a piece.
+  Short of 24 each row repeats its half in whole laps, keeping the duplicated track wider
+  than the viewport without placing a wallpaper next to a copy of itself; under four
+  featured a half would be one repeating tile, so both rows take the whole list.
+- `/featured` capped its featured query at 6 rows, so the marquees could only ever show 3
+  per row even with 27 wallpapers flagged featured. The endpoint now takes an optional
+  `limit` (clamped to 48) and **still defaults to 6**, leaving the desktop app's home
+  screen — the other consumer of that route — untouched.
 - Screenshots ship as WebP (86q) — 229/67/361 KB instead of 2.0/0.9/6.2 MB PNG.
 - The design's animation keyframes live in `styles.css` as classes rather than inline
   styles, so `prefers-reduced-motion` can switch them all off in one place.
@@ -40,9 +44,12 @@ accordion FAQ.
 
 - `bun run typecheck`: clean
 - `bun run build`: built, no warnings
-- Running dev app at `http://localhost:3001`: hero, demo, screens, gallery marquee (14
-  tiles/row from 6 featured wallpapers), features, pricing, reviews, FAQ and footer all
-  render; no console errors; `scrollWidth` 1286 vs `innerWidth` 1296 (no horizontal overflow)
+- Running dev app at `http://localhost:3001`: hero, demo, screens, gallery, features,
+  pricing, reviews, FAQ and footer all render; no console errors; `scrollWidth` 1286 vs
+  `innerWidth` 1296 (no horizontal overflow)
+- SSR HTML of `/`: 48 marquee tiles — 24 per row, 12 unique each, 0 overlap between rows
+- `GET /featured` still returns 6 featured (desktop app unchanged); `?limit=24` returns 24,
+  all `featured=true`; `?limit=999` clamps and returns the 27 that exist
 
 ## Limitations
 
