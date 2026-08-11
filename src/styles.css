@@ -69,16 +69,6 @@ body {
     transform: translateX(0);
   }
 }
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 @keyframes breathe {
   0%,
   100% {
@@ -96,9 +86,6 @@ body {
 .marquee-b {
   animation: mqB var(--mq-duration, 55s) linear infinite;
 }
-.hero-rise {
-  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
 .hero-glow {
   animation: breathe 9s ease-in-out infinite;
 }
@@ -106,7 +93,6 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .marquee-a,
   .marquee-b,
-  .hero-rise,
   .hero-glow {
     animation: none;
   }
