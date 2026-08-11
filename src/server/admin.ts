@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { AdminList, AdminStats, WallpaperItem } from "../lib/types";
+import type { AdminList, AdminStats, Category, WallpaperItem } from "../lib/types";
 import { apiFetch } from "./api";
 import { requireAdminToken } from "./session.server";
 
@@ -58,6 +58,35 @@ export const updateWallpaper = createServerFn({ method: "POST" })
       method: "PATCH",
       headers: { ...authHeaders(), "content-type": "application/json" },
       body: JSON.stringify(data.patch),
+    });
+  });
+
+export const createCategory = createServerFn({ method: "POST" })
+  .inputValidator((data: { name: string }) => data)
+  .handler(async ({ data }) => {
+    return apiFetch<{ ok: true; item: Category }>("/admin/categories", {
+      method: "POST",
+      headers: { ...authHeaders(), "content-type": "application/json" },
+      body: JSON.stringify({ name: data.name }),
+    });
+  });
+
+export const updateCategory = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; patch: { name?: string; sortOrder?: number } }) => data)
+  .handler(async ({ data }) => {
+    return apiFetch<{ ok: true; item: Category }>(`/admin/categories/${data.id}`, {
+      method: "PATCH",
+      headers: { ...authHeaders(), "content-type": "application/json" },
+      body: JSON.stringify(data.patch),
+    });
+  });
+
+export const deleteCategory = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    return apiFetch<{ ok: true }>(`/admin/categories/${data.id}`, {
+      method: "DELETE",
+      headers: authHeaders(),
     });
   });
 

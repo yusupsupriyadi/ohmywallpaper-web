@@ -5,6 +5,7 @@ import {
   Image01Icon,
   LinkSquare01Icon,
   Logout01Icon,
+  TagsIcon,
 } from "@hugeicons/core-free-icons";
 import { Wordmark } from "../../components/Logo";
 import { getSession, logout } from "../../server/auth";
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/admin")({
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: DashboardSquare01Icon, exact: true },
   { to: "/admin/wallpapers", label: "Wallpapers", icon: Image01Icon, exact: false },
+  { to: "/admin/categories", label: "Categories", icon: TagsIcon, exact: false },
 ] as const;
 
 function AdminLayout() {
