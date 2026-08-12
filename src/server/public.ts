@@ -12,8 +12,8 @@ export const listCategories = createServerFn({ method: "GET" }).handler(async ()
 export const getShowcase = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const [showcase, stats] = await Promise.all([
-      // 24 = the landing gallery's two marquee rows of 12 unique wallpapers each.
-      apiFetch<Showcase>("/featured?limit=24"),
+      // 30 = the landing gallery's two marquee rows of 15 unique wallpapers each.
+      apiFetch<Showcase>("/featured?limit=30"),
       apiFetch<PublicStats>("/stats").catch(() => null),
     ]);
     return { ...showcase, stats };

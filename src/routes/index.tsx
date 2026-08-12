@@ -263,7 +263,7 @@ const FAQS: [string, string][] = [
 ];
 
 /** Unique wallpapers per gallery marquee row; the loader fetches 2× this many. */
-const GALLERY_ROW_TILES = 12;
+const GALLERY_ROW_TILES = 15;
 
 /**
  * Cards in one lap of the reviews marquee. 12 × 346px = 4152px, so a lap stays wider
@@ -474,8 +474,8 @@ function Landing() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   // The two gallery marquees run on the catalog's featured wallpapers only, split
-  // down the middle so the rows never show the same piece. With the loader's 24
-  // that is 12 unique wallpapers per row. Short of that each row repeats its half
+  // down the middle so the rows never show the same piece. With the loader's 30
+  // that is 15 unique wallpapers per row. Short of that each row repeats its half
   // in whole laps, and under four featured a half would be one tile over and over,
   // so both rows take the whole list instead.
   const featured = showcase?.featured ?? [];
