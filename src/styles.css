@@ -13,7 +13,9 @@
   --color-accent-soft: rgba(76, 141, 255, 0.14);
   --color-danger: #ff5c5c;
   --font-sans: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
-  /* Landing-page pairing: Gabarito for display, Figtree for body copy. */
+  /* Landing-page pairing: Wallpoet for headings, Gabarito for the rest of the
+     display type (card titles, badges, stat numbers), Figtree for body copy. */
+  --font-title: "Wallpoet", "Gabarito", "Segoe UI", system-ui, sans-serif;
   --font-display: "Gabarito", "Segoe UI", system-ui, sans-serif;
   --font-body: "Figtree", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --animate-fade-up: fade-up 0.5s ease both;
