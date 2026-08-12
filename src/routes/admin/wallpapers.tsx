@@ -31,6 +31,7 @@ interface Filters {
   q?: string;
   category?: string;
   kind?: string;
+  featured?: boolean;
   page?: number;
 }
 
@@ -42,13 +43,27 @@ export const Route = createFileRoute("/admin/wallpapers")({
         ? search.category
         : undefined,
     kind: search.kind === "static" || search.kind === "live" ? search.kind : undefined,
+    // The URL carries this as a raw string on a cold load, as a boolean once the
+    // router has round-tripped it — accept both.
+    featured:
+      search.featured === true || search.featured === "true"
+        ? true
+        : search.featured === false || search.featured === "false"
+          ? false
+          : undefined,
     page: typeof search.page === "number" && search.page > 1 ? search.page : undefined,
   }),
   loaderDeps: ({ search }) => search,
   loader: async ({ deps }) => {
     const [list, categories] = await Promise.all([
       listWallpapers({
-        data: { search: deps.q, category: deps.category, kind: deps.kind, page: deps.page },
+        data: {
+          search: deps.q,
+          category: deps.category,
+          kind: deps.kind,
+          featured: deps.featured,
+          page: deps.page,
+        },
       }),
       listCategories(),
     ]);
@@ -173,6 +188,22 @@ function Wallpapers() {
           active={search.kind === "live"}
           label="Live"
           onClick={() => setFilter({ kind: "live" })}
+        />
+        <span className="mx-1 h-5 w-px bg-line" />
+        <FilterChip
+          active={search.featured === undefined}
+          label="Any status"
+          onClick={() => setFilter({ featured: undefined })}
+        />
+        <FilterChip
+          active={search.featured === true}
+          label="Featured"
+          onClick={() => setFilter({ featured: true })}
+        />
+        <FilterChip
+          active={search.featured === false}
+          label="Not featured"
+          onClick={() => setFilter({ featured: false })}
         />
         <span className="mx-1 h-5 w-px bg-line" />
         <FilterChip

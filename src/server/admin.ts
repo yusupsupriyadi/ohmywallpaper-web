@@ -27,7 +27,7 @@ export const listWallpapers = createServerFn({ method: "GET" })
     if (data.search) params.set("search", data.search);
     if (data.category) params.set("category", data.category);
     if (data.kind) params.set("kind", data.kind);
-    if (data.featured) params.set("featured", "true");
+    if (data.featured !== undefined) params.set("featured", String(data.featured));
     if (data.sort) params.set("sort", data.sort);
     if (data.page && data.page > 1) params.set("page", String(data.page));
     return apiFetch<AdminList>(`/admin/wallpapers?${params}`, { headers: authHeaders() });
