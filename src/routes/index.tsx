@@ -473,8 +473,9 @@ function Landing() {
   const showcase = Route.useLoaderData();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // The two gallery marquees run on the catalog's featured wallpapers only, split
-  // down the middle so the rows never show the same piece. With the loader's 30
+  // The two gallery marquees run on the catalog's featured wallpapers only — shuffled
+  // by the loader, then split down the middle so the rows never show the same piece
+  // and each load lays them out differently. With the loader's 30
   // that is 15 unique wallpapers per row. Short of that each row repeats its half
   // in whole laps, and under four featured a half would be one tile over and over,
   // so both rows take the whole list instead.
