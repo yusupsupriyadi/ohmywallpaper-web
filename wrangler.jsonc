@@ -1,0 +1,18 @@
+// Cloudflare Workers config for the SSR web app (TanStack Start).
+// Production URL: https://ohmywallpaper.ystudio.my.id
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ohmywallpaper-web",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "routes": [
+    { "pattern": "ohmywallpaper.ystudio.my.id", "custom_domain": true }
+  ],
+  "vars": {
+    // Server functions call the public edge API (ohmywallpaper-api/worker).
+    // Local dev overrides this via .dev.vars to keep pointing at localhost:3000.
+    "API_BASE_URL": "https://api.ohmywallpaper.ystudio.my.id"
+  },
+  "observability": { "enabled": true }
+}

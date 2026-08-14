@@ -1,6 +1,10 @@
 /** Server-only helpers: base URL + fetch wrapper for the ohmywallpaper-api. */
 
-export const API_BASE = process.env.API_BASE_URL ?? "http://localhost:3000";
+/**
+ * Read per call, not at module scope: on Cloudflare Workers the var is only
+ * guaranteed to be populated once a request is being handled.
+ */
+export const apiBase = () => process.env.API_BASE_URL ?? "http://localhost:3000";
 
 export class ApiError extends Error {
   status: number;
@@ -11,7 +15,7 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, init);
+  const res = await fetch(`${apiBase()}${path}`, init);
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const msg =
