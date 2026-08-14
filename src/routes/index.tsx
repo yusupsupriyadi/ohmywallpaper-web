@@ -78,6 +78,10 @@ const LEAD = "text-[15.5px] leading-[1.58] text-[#8f8f99] text-pretty";
 const CTA_LIGHT =
   "inline-flex items-center gap-2.5 rounded-full bg-[#f4f4f6] text-[15px] font-semibold text-[#0a0a0c] no-underline shadow-[0_8px_30px_rgba(255,255,255,0.10)]";
 
+/** Installer artifact uploaded to the public R2 bucket (releases/ prefix). */
+const DOWNLOAD_URL =
+  "https://pub-2ed10c13accd4b438e42f7672ea46d01.r2.dev/releases/ohmywallpaper_0.1.1_x64-setup.exe";
+
 /* --------------------------------- motion --------------------------------- */
 
 /** The design's hero easing, reused for every entrance so the page feels of a piece. */
@@ -550,7 +554,7 @@ function Landing() {
               ))}
             </div>
             <motion.a
-              href="#download"
+              href={DOWNLOAD_URL}
               className="flex flex-none items-center gap-2 rounded-full bg-[#f4f4f6] px-[18px] py-[9px] text-sm font-semibold text-[#0a0a0c] no-underline"
               {...HOVER_PRESS}
             >
@@ -608,7 +612,7 @@ function Landing() {
                 {...heroRise(0.32)}
               >
                 <motion.a
-                  href="#download"
+                  href={DOWNLOAD_URL}
                   className={`${CTA_LIGHT} px-[26px] py-3.5`}
                   {...HOVER_PRESS}
                 >
@@ -625,7 +629,7 @@ function Landing() {
                 </motion.a>
               </motion.div>
               <motion.p className="mt-5 text-[13px] text-[#5f5f69]" {...heroRise(0.4)}>
-                Free download · 42 MB installer · Windows 10 and 11
+                Free download · 2 MB installer · Windows 10 and 11
               </motion.p>
               <div className="mt-[34px] flex flex-wrap items-center justify-center gap-2">
                 {/* the engine claim the rest of the row is a consequence of, so it leads */}
@@ -883,7 +887,7 @@ function Landing() {
                   ))}
                 </div>
                 <motion.a
-                  href="#download"
+                  href={DOWNLOAD_URL}
                   className="block rounded-full bg-[#f4f4f6] py-3.5 text-center text-[15px] font-semibold text-[#0a0a0c] no-underline"
                   {...HOVER_PRESS}
                 >
@@ -1023,7 +1027,11 @@ function Landing() {
                 className="flex flex-wrap items-center justify-center gap-3"
                 {...reveal(0.24)}
               >
-                <motion.a href="#top" className={`${CTA_LIGHT} px-7 py-[15px]`} {...HOVER_PRESS}>
+                <motion.a
+                  href={DOWNLOAD_URL}
+                  className={`${CTA_LIGHT} px-7 py-[15px]`}
+                  {...HOVER_PRESS}
+                >
                   <WindowsGlyph size={15} />
                   Download for Windows
                 </motion.a>
