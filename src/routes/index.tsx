@@ -80,7 +80,7 @@ const CTA_LIGHT =
 
 /** Installer artifact uploaded to the public R2 bucket (releases/ prefix). */
 const DOWNLOAD_URL =
-  "https://pub-2ed10c13accd4b438e42f7672ea46d01.r2.dev/releases/ohmywallpaper_0.1.1_x64-setup.exe";
+  "https://pub-2ed10c13accd4b438e42f7672ea46d01.r2.dev/releases/ohmywallpaper_0.1.2_x64-setup.exe";
 
 /* --------------------------------- motion --------------------------------- */
 
