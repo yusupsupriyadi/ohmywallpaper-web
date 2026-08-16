@@ -270,6 +270,12 @@ const FAQS: [string, string][] = [
 const GALLERY_ROW_TILES = 15;
 
 /**
+ * The reviews section is off until the placeholder quotes in QUOTES are replaced with
+ * real ones. Flip to `true` to bring the section back.
+ */
+const SHOW_REVIEWS = false;
+
+/**
  * Cards in one lap of the reviews marquee. 12 × 346px = 4152px, so a lap stays wider
  * than a 4K viewport and the same quote is never on screen twice.
  */
@@ -901,65 +907,67 @@ function Landing() {
           </section>
 
           {/* ------------------------------ reviews ---------------------------- */}
-          <section id="reviews" className="pt-[130px]">
-            <div className="px-8 text-center">
-              <motion.div className={EYEBROW} {...reveal()}>
-                Loved by users
-              </motion.div>
-              <motion.h2 className={`${H2} m-0 mb-[18px]`} {...reveal(0.06)}>
-                What people are saying
-              </motion.h2>
-              <motion.p className={`mx-auto max-w-[520px] ${LEAD}`} {...reveal(0.12)}>
-                Join the Windows users who stopped settling for the default
-                background.
-              </motion.p>
-            </div>
-            <motion.div
-              className="mt-14 overflow-hidden"
-              style={{
-                WebkitMaskImage:
-                  "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
-                maskImage:
-                  "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
-              }}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.8, ease: EASE }}
-            >
-              {/* gap lives on the cards, not the track — see MarqueeRow */}
-              <div
-                className="marquee-a flex w-max"
-                style={{ "--mq-duration": SPEED_C } as React.CSSProperties}
-              >
-                {[...reviewLap, ...reviewLap].map((q, i) => (
-                  <div
-                    key={`${q.name}-${i}`}
-                    className="mr-4 flex w-[330px] flex-none flex-col justify-between gap-[22px] rounded-[20px] p-[26px]"
-                    style={GLASS_CARD}
-                  >
-                    <div>
-                      <div className="mb-3.5 text-xs tracking-[2px] text-[#f5b93b]">
-                        ★★★★★
-                      </div>
-                      <p className="m-0 text-[13.8px] leading-[1.6] text-[#d2d2d9]">
-                        {q.text}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-[11px] border-t border-white/[0.07] pt-4">
-                      <div className="h-[30px] w-[30px] flex-none rounded-full bg-gradient-to-br from-[#3b82f6] to-[#a855f7]" />
-                      <div>
-                        <div className="text-[13.5px] font-semibold text-[#eaeaef]">
-                          {q.name}
-                        </div>
-                        <div className="text-xs text-[#6d6d77]">{q.role}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          {SHOW_REVIEWS && (
+            <section id="reviews" className="pt-[130px]">
+              <div className="px-8 text-center">
+                <motion.div className={EYEBROW} {...reveal()}>
+                  Loved by users
+                </motion.div>
+                <motion.h2 className={`${H2} m-0 mb-[18px]`} {...reveal(0.06)}>
+                  What people are saying
+                </motion.h2>
+                <motion.p className={`mx-auto max-w-[520px] ${LEAD}`} {...reveal(0.12)}>
+                  Join the Windows users who stopped settling for the default
+                  background.
+                </motion.p>
               </div>
-            </motion.div>
-          </section>
+              <motion.div
+                className="mt-14 overflow-hidden"
+                style={{
+                  WebkitMaskImage:
+                    "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
+                  maskImage:
+                    "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)",
+                }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.8, ease: EASE }}
+              >
+                {/* gap lives on the cards, not the track — see MarqueeRow */}
+                <div
+                  className="marquee-a flex w-max"
+                  style={{ "--mq-duration": SPEED_C } as React.CSSProperties}
+                >
+                  {[...reviewLap, ...reviewLap].map((q, i) => (
+                    <div
+                      key={`${q.name}-${i}`}
+                      className="mr-4 flex w-[330px] flex-none flex-col justify-between gap-[22px] rounded-[20px] p-[26px]"
+                      style={GLASS_CARD}
+                    >
+                      <div>
+                        <div className="mb-3.5 text-xs tracking-[2px] text-[#f5b93b]">
+                          ★★★★★
+                        </div>
+                        <p className="m-0 text-[13.8px] leading-[1.6] text-[#d2d2d9]">
+                          {q.text}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-[11px] border-t border-white/[0.07] pt-4">
+                        <div className="h-[30px] w-[30px] flex-none rounded-full bg-gradient-to-br from-[#3b82f6] to-[#a855f7]" />
+                        <div>
+                          <div className="text-[13.5px] font-semibold text-[#eaeaef]">
+                            {q.name}
+                          </div>
+                          <div className="text-xs text-[#6d6d77]">{q.role}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </section>
+          )}
 
           {/* -------------------------------- faq ------------------------------ */}
           <section id="faq" className="px-8 pt-[130px]">
